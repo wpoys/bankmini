@@ -1,0 +1,51 @@
+digraph BANKMINI {
+  rankdir=TB;
+  labelloc="t";
+  label="Rancangan Arsitektur Perangkat Lunak BANK MINI";
+  graph [fontname="Helvetica"];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9];
+
+  subgraph cluster_klien {
+    label="LAPISAN KLIEN";
+    style="filled"; fillcolor="#eef3ff"; color="#8aa4d6";
+    B [label="Browser PC\nAdmin · Teller · Supervisor", fillcolor="#dbe6ff"];
+    M [label="Aplikasi Mobile\nNasabah (Android/iOS)", fillcolor="#dbe6ff"];
+  }
+
+  subgraph cluster_server {
+    label="SERVER APLIKASI — Laravel 13 (Apache/Nginx + PHP-FPM)";
+    style="filled"; fillcolor="#f5f7fa"; color="#9aa7b5";
+    MW [label="Route & Middleware\nauth:sanctum · role · check.active · throttle", fillcolor="#fff2cc"];
+    C  [label="KONTROLER\nAdmin · Teller · Supervisor · Nasabah · Accounting · Api · Auth", fillcolor="#d5e8d4"];
+    S  [label="SERVICE (Logika Bisnis)\nNomorGenerator · PendaftaranNasabah · PermintaanPinService\nResetPasswordOtp · JadwalPetugasService · VerifikasiHarianService", fillcolor="#d5e8d4"];
+    MD [label="MODEL ELOQUENT\nTransaksi · Nasabah · JurnalAkuntansi · LaporanHarian\nKoreksiTransaksi · ActivityLog · Konfigurasi", fillcolor="#d5e8d4"];
+    V  [label="VIEW / RESPONSE\nBlade (web) · JSON (API) · Struk PDF (DomPDF)", fillcolor="#dae8fc"];
+  }
+
+  subgraph cluster_data {
+    label="BASIS DATA TERPUSAT (MySQL — bankukk)";
+    style="filled"; fillcolor="#ffe6cc"; color="#d79b00";
+    DB [label="nasabah · transaksi · jurnal_akuntansi · laporan_harian\nrekonsiliasi_kas · koreksi_transaksi · activity_logs · konfigurasi", fillcolor="#ffe6cc"];
+  }
+
+  subgraph cluster_ext {
+    label="LAYANAN PENDUKUNG";
+    style="filled"; fillcolor="#f0f0f0"; color="#999999";
+    SMTP [label="Server SMTP\n(kirim OTP email)", fillcolor="#f0f0f0"];
+    FSH  [label="File Storage\nstorage/app/backups", fillcolor="#f0f0f0"];
+  }
+
+  B  -> MW [label="HTTP/HTTPS (session)"];
+  M  -> MW [label="HTTPS (token Sanctum)"];
+  MW -> C;
+  C  -> S;
+  C  -> MD [label="akses langsung (berlapis longgar)", style=dashed];
+  S  -> MD;
+  MD -> DB [label="SQL (transaksi ACID)"];
+  C  -> V  [label="render"];
+  V  -> B  [label="halaman web"];
+  V  -> M  [label="response JSON"];
+  S  -> SMTP [label="email OTP"];
+  C  -> FSH  [label="backup"];
+}

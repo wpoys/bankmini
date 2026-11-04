@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" font-family="'Segoe UI',Arial,sans-serif">
+  <rect width="1200" height="760" fill="#FFFFFF"/>
+  <text x="20" y="28" font-size="14" font-weight="700" fill="#98A2B3">WF-04</text>
+
+  <rect x="20" y="44" width="1160" height="690" rx="8" fill="#FCFCFD" stroke="#98A2B3" stroke-width="2"/>
+
+  <rect x="40" y="64" width="360" height="60" rx="6" fill="#FFFFFF" stroke="#98A2B3"/>
+  <text x="56" y="92" font-size="16" font-weight="700" fill="#475467">Daftar Nasabah</text>
+  <text x="56" y="112" font-size="11" fill="#98A2B3">Data induk nasabah bank mini</text>
+
+  <rect x="700" y="74" width="180" height="38" rx="6" fill="#FFFFFF" stroke="#98A2B3"/>
+  <text x="790" y="97" text-anchor="middle" font-size="11" fill="#667085">Impor Excel</text>
+  <rect x="892" y="74" width="130" height="38" rx="6" fill="#FFFFFF" stroke="#98A2B3" stroke-dasharray="5 4"/>
+  <text x="957" y="97" text-anchor="middle" font-size="11" fill="#667085">Arsip</text>
+  <rect x="1034" y="74" width="130" height="38" rx="6" fill="#FFFFFF" stroke="#98A2B3" stroke-dasharray="5 4"/>
+  <text x="1099" y="97" text-anchor="middle" font-size="11" font-weight="700" fill="#667085">+ Tambah</text>
+
+  <rect x="40" y="142" width="1124" height="520" rx="6" fill="#FFFFFF" stroke="#98A2B3"/>
+  <rect x="40" y="142" width="1124" height="52" fill="#F9FAFB" stroke="#98A2B3"/>
+  <circle cx="60" cy="168" r="5" fill="#98A2B3"/>
+  <text x="74" y="172" font-size="12" font-weight="700" fill="#475467">Daftar nasabah</text>
+  <rect x="760" y="155" width="240" height="28" rx="6" fill="#FFFFFF" stroke="#D0D5DD"/>
+  <text x="772" y="173" font-size="10" fill="#98A2B3">Filter di tabel...</text>
+  <rect x="1012" y="155" width="130" height="28" rx="6" fill="#FFFFFF" stroke="#98A2B3"/>
+  <text x="1077" y="173" text-anchor="middle" font-size="10" fill="#667085">Cari nama / NIS</text>
+
+  <g fill="#F2F4F7">
+    <rect x="60" y="206" width="70" height="12" rx="3"/>
+    <rect x="160" y="206" width="70" height="12" rx="3"/>
+    <rect x="270" y="206" width="80" height="12" rx="3"/>
+    <rect x="380" y="206" width="70" height="12" rx="3"/>
+    <rect x="480" y="206" width="60" height="12" rx="3"/>
+    <rect x="570" y="206" width="70" height="12" rx="3"/>
+    <rect x="670" y="206" width="70" height="12" rx="3"/>
+    <rect x="770" y="206" width="60" height="12" rx="3"/>
+    <rect x="870" y="206" width="90" height="12" rx="3"/>
+    <rect x="1010" y="206" width="90" height="12" rx="3"/>
+  </g>
+
+  <g stroke="#EAECF0">
+    <line x1="40" y1="240" x2="1164" y2="240"/>
+    <line x1="40" y1="284" x2="1164" y2="284"/>
+    <line x1="40" y1="328" x2="1164" y2="328"/>
+    <line x1="40" y1="372" x2="1164" y2="372"/>
+    <line x1="40" y1="416" x2="1164" y2="416"/>
+    <line x1="40" y1="460" x2="1164" y2="460"/>
+    <line x1="40" y1="504" x2="1164" y2="504"/>
+    <line x1="40" y1="548" x2="1164" y2="548"/>
+    <line x1="40" y1="592" x2="1164" y2="592"/>
+  </g>
+
+  <g fill="#EAECF0">
+    <rect x="60" y="254" width="80" height="10" rx="3"/><rect x="160" y="254" width="80" height="10" rx="3"/><rect x="270" y="254" width="70" height="10" rx="3"/><rect x="380" y="254" width="90" height="10" rx="3"/><rect x="480" y="254" width="60" height="10" rx="3"/><rect x="570" y="254" width="70" height="10" rx="3"/><rect x="670" y="254" width="70" height="10" rx="3"/><rect x="770" y="254" width="60" height="10" rx="3"/>
+    <rect x="60" y="298" width="80" height="10" rx="3"/><rect x="160" y="298" width="80" height="10" rx="3"/><rect x="270" y="298" width="70" height="10" rx="3"/><rect x="380" y="298" width="90" height="10" rx="3"/><rect x="480" y="298" width="60" height="10" rx="3"/><rect x="570" y="298" width="70" height="10" rx="3"/><rect x="670" y="298" width="70" height="10" rx="3"/><rect x="770" y="298" width="60" height="10" rx="3"/>
+    <rect x="60" y="342" width="80" height="10" rx="3"/><rect x="160" y="342" width="80" height="10" rx="3"/><rect x="270" y="342" width="70" height="10" rx="3"/><rect x="380" y="342" width="90" height="10" rx="3"/><rect x="480" y="342" width="60" height="10" rx="3"/><rect x="570" y="342" width="70" height="10" rx="3"/><rect x="670" y="342" width="70" height="10" rx="3"/><rect x="770" y="342" width="60" height="10" rx="3"/>
+    <rect x="60" y="386" width="80" height="10" rx="3"/><rect x="160" y="386" width="80" height="10" rx="3"/><rect x="270" y="386" width="70" height="10" rx="3"/><rect x="380" y="386" width="90" height="10" rx="3"/><rect x="480" y="386" width="60" height="10" rx="3"/><rect x="570" y="386" width="70" height="10" rx="3"/><rect x="670" y="386" width="70" height="10" rx="3"/><rect x="770" y="386" width="60" height="10" rx="3"/>
+    <rect x="60" y="430" width="80" height="10" rx="3"/><rect x="160" y="430" width="80" height="10" rx="3"/><rect x="270" y="430" width="70" height="10" rx="3"/><rect x="380" y="430" width="90" height="10" rx="3"/><rect x="480" y="430" width="60" height="10" rx="3"/><rect x="570" y="430" width="70" height="10" rx="3"/><rect x="670" y="430" width="70" height="10" rx="3"/><rect x="770" y="430" width="60" height="10" rx="3"/>
+    <rect x="60" y="474" width="80" height="10" rx="3"/><rect x="160" y="474" width="80" height="10" rx="3"/><rect x="270" y="474" width="70" height="10" rx="3"/><rect x="380" y="474" width="90" height="10" rx="3"/><rect x="480" y="474" width="60" height="10" rx="3"/><rect x="570" y="474" width="70" height="10" rx="3"/><rect x="670" y="474" width="70" height="10" rx="3"/><rect x="770" y="474" width="60" height="10" rx="3"/>
+  </g>
+
+  <g>
+    <rect x="872" y="250" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="940" y="250" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="872" y="294" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="940" y="294" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="872" y="338" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="940" y="338" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="872" y="382" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="940" y="382" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="872" y="426" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="940" y="426" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="872" y="470" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <rect x="940" y="470" width="56" height="18" rx="9" fill="#F2F4F7" stroke="#D0D5DD"/>
+  </g>
+
+  <g fill="#FFFFFF" stroke="#98A2B3" stroke-dasharray="4 3">
+    <rect x="1012" y="248" width="54" height="22" rx="5"/>
+    <rect x="1074" y="248" width="54" height="22" rx="5"/>
+    <rect x="1012" y="292" width="54" height="22" rx="5"/>
+    <rect x="1074" y="292" width="54" height="22" rx="5"/>
+    <rect x="1012" y="336" width="54" height="22" rx="5"/>
+    <rect x="1074" y="336" width="54" height="22" rx="5"/>
+  </g>
+  <g font-size="9" fill="#667085" text-anchor="middle">
+    <text x="1039" y="263">Edit</text><text x="1101" y="263">Hapus</text>
+    <text x="1039" y="307">Edit</text><text x="1101" y="307">Hapus</text>
+    <text x="1039" y="351">Edit</text><text x="1101" y="351">Hapus</text>
+  </g>
+
+  <text x="60" y="626" font-size="11" fill="#98A2B3">Menampilkan 1–6 dari 120 nasabah</text>
+  <g fill="#FFFFFF" stroke="#98A2B3">
+    <rect x="960" y="610" width="34" height="26" rx="5"/>
+    <rect x="1002" y="610" width="34" height="26" rx="5"/>
+    <rect x="1044" y="610" width="34" height="26" rx="5"/>
+    <rect x="1086" y="610" width="56" height="26" rx="5"/>
+  </g>
+  <g font-size="11" fill="#667085" text-anchor="middle">
+    <text x="977" y="627">&lt;</text><text x="1019" y="627">1</text><text x="1061" y="627">2</text><text x="1114" y="627">&gt;</text>
+  </g>
+
+  <rect x="330" y="676" width="540" height="0" fill="none"/>
+</svg>

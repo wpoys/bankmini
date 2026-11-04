@@ -1,0 +1,141 @@
+@extends('layouts.app')
+
+@section('title', 'Laporan Harian')
+@section('page-title', 'Laporan Harian')
+@section('page-subtitle', 'Rekapitulasi laporan kas harian teller')
+
+@section('content')
+    <div class="page-animate">
+        <div class="page-header">
+            <div>
+                <h1>Laporan Harian</h1>
+                <div class="page-header-sub">Rekapitulasi laporan kas harian teller</div>
+            </div>
+        </div>
+
+        @include('supervisor.laporan.partials.filter', ['rute' => 'supervisor.laporan.laporan-harian'])
+
+    <div class="data-panel">
+        <div class="panel-head">
+            <div class="panel-title"><span class="dot"></span>Rekapitulasi Periode</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-nowrap mb-0">
+                <thead>
+                    <tr>
+                        <th>Keterangan</th>
+                        <th class="text-end">Nilai</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Periode laporan</td><td class="text-end">{{ $mulai->format('d/m/Y') }} s/d {{ $sampai->format('d/m/Y') }}</td></tr>
+                    <tr><td>Jumlah laporan</td><td class="text-end">{{ $laporan->count() }}</td></tr>
+                    <tr><td>Total transaksi</td><td class="text-end">{{ $rincianTransaksi->count() }}</td></tr>
+                    <tr><td>Total setoran</td><td class="num text-end">Rp {{ number_format($totalSetoran, 0, ',', '.') }}</td></tr>
+                    <tr><td>Total penarikan</td><td class="num text-end">Rp {{ number_format($totalPenarikan, 0, ',', '.') }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="data-panel mt-3">
+        <div class="panel-head">
+            <div class="panel-title"><span class="dot"></span>Rincian Kas Harian</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-nowrap mb-0">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Teller</th>
+                        <th>Status</th>
+                        <th class="text-end">Saldo Awal</th>
+                        <th class="text-end">Setoran</th>
+                        <th class="text-end">Penarikan</th>
+                        <th class="text-end">Saldo Akhir Sistem</th>
+                        <th class="text-end">Uang Fisik</th>
+                        <th class="text-end">Selisih</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($laporan as $l)
+                        <tr>
+                            <td class="small">{{ $l->tanggal->format('d/m/Y') }}</td>
+                            <td class="fw-semibold small">{{ $l->teller?->nama_petugas ?? '-' }}</td>
+                            <td><span class="badge badge-soft-{{ in_array($l->status, ['disetujui', 'approved']) ? 'success' : (in_array($l->status, ['menunggu_approval', 'pending']) ? 'warning' : (in_array($l->status, ['ditolak', 'rejected']) ? 'danger' : 'secondary')) }}">{{ $l->status_label }}</span></td>
+                            <td class="num small text-end">Rp {{ number_format($l->saldo_awal_kas, 0, ',', '.') }}</td>
+                            <td class="num small text-end">Rp {{ number_format($l->total_setoran, 0, ',', '.') }}</td>
+                            <td class="num small text-end">Rp {{ number_format($l->total_penarikan, 0, ',', '.') }}</td>
+                            <td class="num fw-semibold small text-end">Rp {{ number_format($l->saldo_akhir_sistem, 0, ',', '.') }}</td>
+                            <td class="num small text-end">{{ $l->saldo_akhir_fisik !== null ? 'Rp '.number_format($l->saldo_akhir_fisik, 0, ',', '.') : '-' }}</td>
+                            <td class="num small text-end {{ $l->selisih != 0 ? 'text-danger fw-bold' : 'text-success' }}">{{ $l->selisih !== null ? 'Rp '.number_format($l->selisih, 0, ',', '.') : '-' }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9">
+                                <div class="empty-state">
+                                    <div class="empty-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                                    <div class="empty-title">Tidak ada laporan</div>
+                                    <div class="empty-desc">Tidak ada laporan pada rentang tanggal tersebut.</div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if ($laporan->isNotEmpty())
+                    <tfoot>
+                        <tr class="fw-bold total-row">
+                            <td colspan="4" class="small">TOTAL</td>
+                            <td class="num small text-end">Rp {{ number_format($totalSetoran, 0, ',', '.') }}</td>
+                            <td class="num small text-end">Rp {{ number_format($totalPenarikan, 0, ',', '.') }}</td>
+                            <td class="num small text-end">Rp {{ number_format($laporan->sum('saldo_akhir_sistem'), 0, ',', '.') }}</td>
+                            <td class="num small text-end">Rp {{ number_format($laporan->sum('saldo_akhir_fisik'), 0, ',', '.') }}</td>
+                            <td class="num small text-end">Rp {{ number_format($laporan->sum('selisih'), 0, ',', '.') }}</td>
+                        </tr>
+                    </tfoot>
+                @endif
+            </table>
+        </div>
+    </div>
+
+    <div class="data-panel mt-3">
+        <div class="panel-head">
+            <div class="panel-title"><span class="dot"></span>Rincian Transaksi</div>
+            <span class="small text-muted">{{ $rincianTransaksi->count() }} transaksi</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-nowrap mb-0">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>No. Struk</th>
+                        <th>Teller</th>
+                        <th>No. Rekening</th>
+                        <th>Nasabah</th>
+                        <th>Jenis</th>
+                        <th class="text-end">Nominal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($rincianTransaksi as $detail)
+                        @php($t = $detail['transaksi'])
+                        <tr>
+                            <td class="small">{{ $detail['laporan']->tanggal->format('d/m/Y') }}</td>
+                            <td class="small">{{ $t->created_at?->format('H:i') ?? '-' }}</td>
+                            <td><code class="small">{{ $t->no_struk }}</code></td>
+                            <td class="small">{{ $detail['laporan']->teller?->nama_petugas ?? '-' }}</td>
+                            <td class="small">{{ $t->nasabah?->no_rekening ?? '-' }}</td>
+                            <td class="small">{{ $t->nasabah?->nama_siswa ?? '-' }}</td>
+                            <td><span class="badge badge-soft-{{ $t->jenis_trans === 'setoran' ? 'success' : 'danger' }}">{{ $t->jenis_label }}</span></td>
+                            <td class="num small text-end">Rp {{ number_format($t->nominal, 0, ',', '.') }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="8"><div class="empty-state"><div class="empty-title">Tidak ada detail transaksi</div></div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+@endsection

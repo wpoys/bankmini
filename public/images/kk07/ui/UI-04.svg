@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" font-family="'Segoe UI',Arial,sans-serif">
+  <defs>
+    <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0B1833"/>
+      <stop offset="100%" stop-color="#07152F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="800" fill="#F4F6FA"/>
+
+  <!-- SIDEBAR ADMIN -->
+  <rect x="0" y="0" width="246" height="800" fill="url(#navy)"/>
+  <circle cx="38" cy="36" r="18" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-opacity="0.35"/>
+  <text x="38" y="40" text-anchor="middle" font-size="9" font-weight="800" fill="#FFFFFF">SMK</text>
+  <text x="66" y="32" font-size="14" font-weight="800" fill="#FFFFFF">BANK MINI</text>
+  <text x="66" y="48" font-size="9.5" fill="#AAB8D0">Sistem Informasi E-Teller</text>
+
+  <text x="18" y="88" font-size="9" font-weight="800" fill="#6B7A99" letter-spacing="1.2">OVERVIEW</text>
+  <text x="24" y="119" font-size="13" fill="#8FA0BE">◆</text>
+  <text x="48" y="120" font-size="12.5" font-weight="500" fill="#C3CCE0">Dashboard</text>
+
+  <text x="18" y="164" font-size="9" font-weight="800" fill="#6B7A99" letter-spacing="1.2">TRANSAKSI</text>
+  <text x="24" y="192" font-size="13" fill="#8FA0BE">⇄</text>
+  <text x="48" y="193" font-size="12.5" font-weight="500" fill="#C3CCE0">Ringkasan Transaksi</text>
+
+  <text x="18" y="236" font-size="9" font-weight="800" fill="#6B7A99" letter-spacing="1.2">AKUN</text>
+  <rect x="10" y="246" width="226" height="34" rx="4" fill="#16305E"/>
+  <rect x="10" y="250" width="3" height="26" rx="1.5" fill="#7C6CF0"/>
+  <text x="24" y="267" font-size="13" fill="#B7A8FF">◉</text>
+  <text x="48" y="268" font-size="12.5" font-weight="700" fill="#FFFFFF">Manajemen Pengguna</text>
+  <text x="24" y="301" font-size="13" fill="#8FA0BE">⇪</text>
+  <text x="48" y="302" font-size="12.5" font-weight="500" fill="#C3CCE0">Import Nasabah</text>
+
+  <text x="18" y="344" font-size="9" font-weight="800" fill="#6B7A99" letter-spacing="1.2">PENJADWALAN</text>
+  <text x="24" y="372" font-size="13" fill="#8FA0BE">▦</text>
+  <text x="48" y="373" font-size="12.5" font-weight="500" fill="#C3CCE0">Jadwal Petugas</text>
+
+  <text x="18" y="416" font-size="9" font-weight="800" fill="#6B7A99" letter-spacing="1.2">LAPORAN KEUANGAN &amp; JURNAL</text>
+  <text x="24" y="444" font-size="13" fill="#8FA0BE">≡</text>
+  <text x="48" y="445" font-size="12.5" font-weight="500" fill="#C3CCE0">Buku Jurnal</text>
+  <text x="24" y="474" font-size="13" fill="#8FA0BE">⎙</text>
+  <text x="48" y="475" font-size="12.5" font-weight="500" fill="#C3CCE0">Laporan &amp; Export</text>
+  <text x="24" y="504" font-size="13" fill="#8FA0BE">✓</text>
+  <text x="48" y="505" font-size="12.5" font-weight="500" fill="#C3CCE0">Verifikasi Laporan</text>
+  <text x="24" y="534" font-size="13" fill="#8FA0BE">☑</text>
+  <text x="48" y="535" font-size="12.5" font-weight="500" fill="#C3CCE0">Audit Trail</text>
+
+  <text x="18" y="578" font-size="9" font-weight="800" fill="#6B7A99" letter-spacing="1.2">SISTEM</text>
+  <text x="24" y="606" font-size="13" fill="#8FA0BE">⚙</text>
+  <text x="48" y="607" font-size="12.5" font-weight="500" fill="#C3CCE0">Konfigurasi</text>
+  <text x="24" y="636" font-size="13" fill="#8FA0BE">▣</text>
+  <text x="48" y="637" font-size="12.5" font-weight="500" fill="#C3CCE0">Backup Database</text>
+
+  <line x1="12" y1="726" x2="234" y2="726" stroke="#FFFFFF" stroke-opacity="0.10"/>
+  <text x="24" y="756" font-size="13" fill="#8FA0BE">⏏</text>
+  <text x="48" y="757" font-size="12.5" font-weight="500" fill="#C3CCE0">Keluar</text>
+  <circle cx="26" cy="778" r="4" fill="#16A34A"/>
+  <text x="38" y="782" font-size="10.5" fill="#6B7A99">Operasional</text>
+
+  <!-- TOPBAR -->
+  <rect x="246" y="0" width="1034" height="62" fill="#FFFFFF"/>
+  <line x1="246" y1="62" x2="1280" y2="62" stroke="#E1E6EF"/>
+  <text x="270" y="28" font-size="14" font-weight="800" fill="#16233B">Manajemen Nasabah</text>
+  <text x="270" y="47" font-size="11" fill="#5B6B85">Kelola data induk nasabah bank mini</text>
+  <text x="880" y="36" font-size="11.5" fill="#5B6B85">▣ Senin, 12 Oktober 2026</text>
+  <line x1="1038" y1="16" x2="1038" y2="46" stroke="#E1E6EF"/>
+  <circle cx="1070" cy="31" r="15" fill="#FFFFFF" stroke="#E1E6EF"/>
+  <text x="1070" y="36" text-anchor="middle" font-size="13" fill="#5B6B85">🔔</text>
+  <rect x="1094" y="14" width="172" height="34" rx="17" fill="#F4F6FA" stroke="#E1E6EF"/>
+  <circle cx="1113" cy="31" r="13" fill="#0B1833"/>
+  <text x="1113" y="35" text-anchor="middle" font-size="10" font-weight="800" fill="#FFFFFF">A</text>
+  <text x="1134" y="28" font-size="11.5" font-weight="700" fill="#16233B">Admin Sekolah</text>
+  <text x="1134" y="42" font-size="9.5" fill="#5B6B85">Admin</text>
+
+  <!-- PAGE HEADER -->
+  <text x="270" y="110" font-size="21" font-weight="800" fill="#16233B">Daftar Nasabah</text>
+  <text x="270" y="132" font-size="12" fill="#5B6B85">Data induk nasabah bank mini · 120 rekaman</text>
+  <rect x="854" y="92" width="122" height="32" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+  <text x="872" y="112" font-size="11.5" font-weight="700" fill="#16233B">⇪ Impor Excel</text>
+  <rect x="986" y="92" width="92" height="32" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+  <text x="1006" y="112" font-size="11.5" font-weight="700" fill="#16233B">▤ Arsip</text>
+  <rect x="1088" y="92" width="174" height="32" rx="4" fill="#1D4ED8"/>
+  <text x="1112" y="112" font-size="11.5" font-weight="700" fill="#FFFFFF">＋ Tambah Nasabah</text>
+
+  <!-- PANEL -->
+  <rect x="270" y="150" width="996" height="560" rx="6" fill="#FFFFFF" stroke="#E1E6EF"/>
+  <rect x="270" y="150" width="996" height="48" rx="6" fill="#FBFCFE"/>
+  <line x1="270" y1="198" x2="1266" y2="198" stroke="#E1E6EF"/>
+  <circle cx="288" cy="174" r="4" fill="#1D4ED8"/>
+  <text x="300" y="178" font-size="12.5" font-weight="800" fill="#16233B">Daftar nasabah</text>
+  <rect x="800" y="161" width="230" height="28" rx="5" fill="#FFFFFF" stroke="#E1E6EF"/>
+  <text x="812" y="179" font-size="10.5" fill="#8A97AD">⌕ Filter di tabel: nama / rekening / NIS...</text>
+  <rect x="1042" y="161" width="112" height="28" rx="5" fill="#FFFFFF" stroke="#E1E6EF"/>
+  <text x="1054" y="179" font-size="10.5" fill="#8A97AD">Cari nama / NIS</text>
+  <rect x="1164" y="161" width="34" height="28" rx="5" fill="#1D4ED8"/>
+  <text x="1181" y="179" text-anchor="middle" font-size="11" fill="#FFFFFF">⚙</text>
+
+  <g font-size="10.5" font-weight="800" fill="#5B6B85">
+    <text x="288" y="224">NO. REKENING</text>
+    <text x="410" y="224">NAMA</text>
+    <text x="590" y="224">NIS</text>
+    <text x="690" y="224">KELAS</text>
+    <text x="790" y="224" text-anchor="end">SALDO</text>
+    <text x="880" y="224">STATUS</text>
+    <text x="1160" y="224" text-anchor="end">AKSI</text>
+  </g>
+  <line x1="270" y1="236" x2="1266" y2="236" stroke="#E1E6EF"/>
+  <g stroke="#EEF1F6">
+    <line x1="270" y1="288" x2="1266" y2="288"/>
+    <line x1="270" y1="340" x2="1266" y2="340"/>
+    <line x1="270" y1="392" x2="1266" y2="392"/>
+    <line x1="270" y1="444" x2="1266" y2="444"/>
+    <line x1="270" y1="496" x2="1266" y2="496"/>
+    <line x1="270" y1="548" x2="1266" y2="548"/>
+    <line x1="270" y1="600" x2="1266" y2="600"/>
+    <line x1="270" y1="652" x2="1266" y2="652"/>
+  </g>
+
+  <g font-size="12" fill="#16233B">
+    <text x="288" y="268" font-family="Consolas,monospace" font-size="11.5">0001</text>
+    <text x="410" y="268" font-weight="600">Dimas Prasetyo</text>
+    <text x="590" y="268" fill="#5B6B85">20241001</text>
+    <text x="690" y="268" fill="#5B6B85">XII RPL 1</text>
+    <text x="790" y="268" text-anchor="end" font-weight="700">Rp 500.000</text>
+
+    <text x="288" y="320" font-family="Consolas,monospace" font-size="11.5">0002</text>
+    <text x="410" y="320" font-weight="600">Siti Aminah</text>
+    <text x="590" y="320" fill="#5B6B85">20241002</text>
+    <text x="690" y="320" fill="#5B6B85">XII TKJ 2</text>
+    <text x="790" y="320" text-anchor="end" font-weight="700">Rp 320.000</text>
+
+    <text x="288" y="372" font-family="Consolas,monospace" font-size="11.5">0003</text>
+    <text x="410" y="372" font-weight="600">Andi Wijaya</text>
+    <text x="590" y="372" fill="#5B6B85">20241003</text>
+    <text x="690" y="372" fill="#5B6B85">XI TKR 1</text>
+    <text x="790" y="372" text-anchor="end" font-weight="700">Rp 150.000</text>
+
+    <text x="288" y="424" font-family="Consolas,monospace" font-size="11.5">0004</text>
+    <text x="410" y="424" font-weight="600">Nabila Zahra</text>
+    <text x="590" y="424" fill="#5B6B85">20241004</text>
+    <text x="690" y="424" fill="#5B6B85">XII RPL 2</text>
+    <text x="790" y="424" text-anchor="end" font-weight="700">Rp 750.000</text>
+
+    <text x="288" y="476" font-family="Consolas,monospace" font-size="11.5">0005</text>
+    <text x="410" y="476" font-weight="600">Rizky Maulana</text>
+    <text x="590" y="476" fill="#5B6B85">20241005</text>
+    <text x="690" y="476" fill="#5B6B85">XI AKL 1</text>
+    <text x="790" y="476" text-anchor="end" font-weight="700">Rp 45.000</text>
+
+    <text x="288" y="528" font-family="Consolas,monospace" font-size="11.5">0006</text>
+    <text x="410" y="528" font-weight="600">Fajar Nugroho</text>
+    <text x="590" y="528" fill="#5B6B85">20241006</text>
+    <text x="690" y="528" fill="#5B6B85">XII TKJ 1</text>
+    <text x="790" y="528" text-anchor="end" font-weight="700">Rp 1.020.000</text>
+
+    <text x="288" y="580" font-family="Consolas,monospace" font-size="11.5">0007</text>
+    <text x="410" y="580" font-weight="600">Putri Lestari</text>
+    <text x="590" y="580" fill="#5B6B85">20241007</text>
+    <text x="690" y="580" fill="#5B6B85">XI AKL 2</text>
+    <text x="790" y="580" text-anchor="end" font-weight="700">Rp 88.000</text>
+
+    <text x="288" y="632" font-family="Consolas,monospace" font-size="11.5">0008</text>
+    <text x="410" y="632" font-weight="600">Yoga Saputra</text>
+    <text x="590" y="632" fill="#5B6B85">20241008</text>
+    <text x="690" y="632" fill="#5B6B85">XII RPL 1</text>
+    <text x="790" y="632" text-anchor="end" font-weight="700">Rp 0</text>
+  </g>
+
+  <g>
+    <rect x="880" y="254" width="58" height="19" rx="9.5" fill="#DFF4E6"/>
+    <text x="909" y="267" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803D">Aktif</text>
+    <rect x="880" y="306" width="58" height="19" rx="9.5" fill="#DFF4E6"/>
+    <text x="909" y="319" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803D">Aktif</text>
+    <rect x="880" y="358" width="58" height="19" rx="9.5" fill="#DFF4E6"/>
+    <text x="909" y="371" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803D">Aktif</text>
+    <rect x="880" y="410" width="58" height="19" rx="9.5" fill="#DFF4E6"/>
+    <text x="909" y="423" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803D">Aktif</text>
+    <rect x="880" y="462" width="58" height="19" rx="9.5" fill="#EDF0F5"/>
+    <text x="909" y="475" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5B6B85">Arsip</text>
+    <rect x="880" y="514" width="58" height="19" rx="9.5" fill="#DFF4E6"/>
+    <text x="909" y="527" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803D">Aktif</text>
+    <rect x="880" y="566" width="58" height="19" rx="9.5" fill="#DFF4E6"/>
+    <text x="909" y="579" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803D">Aktif</text>
+    <rect x="880" y="618" width="58" height="19" rx="9.5" fill="#EDF0F5"/>
+    <text x="909" y="631" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5B6B85">Arsip</text>
+  </g>
+
+  <g>
+    <rect x="1044" y="252" width="52" height="24" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1070" y="268" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16233B">Edit</text>
+    <rect x="1104" y="252" width="56" height="24" rx="4" fill="#FFFFFF" stroke="#F3B5B5"/>
+    <text x="1132" y="268" text-anchor="middle" font-size="10.5" font-weight="700" fill="#DC2626">Hapus</text>
+    <rect x="1044" y="304" width="52" height="24" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1070" y="320" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16233B">Edit</text>
+    <rect x="1104" y="304" width="56" height="24" rx="4" fill="#FFFFFF" stroke="#F3B5B5"/>
+    <text x="1132" y="320" text-anchor="middle" font-size="10.5" font-weight="700" fill="#DC2626">Hapus</text>
+    <rect x="1044" y="356" width="52" height="24" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1070" y="372" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16233B">Edit</text>
+    <rect x="1104" y="356" width="56" height="24" rx="4" fill="#FFFFFF" stroke="#F3B5B5"/>
+    <text x="1132" y="372" text-anchor="middle" font-size="10.5" font-weight="700" fill="#DC2626">Hapus</text>
+    <rect x="1044" y="408" width="52" height="24" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1070" y="424" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16233B">Edit</text>
+    <rect x="1104" y="408" width="56" height="24" rx="4" fill="#FFFFFF" stroke="#F3B5B5"/>
+    <text x="1132" y="424" text-anchor="middle" font-size="10.5" font-weight="700" fill="#DC2626">Hapus</text>
+    <rect x="1044" y="460" width="64" height="24" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1076" y="476" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16A34A">Restore</text>
+    <rect x="1044" y="512" width="52" height="24" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1070" y="528" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16233B">Edit</text>
+    <rect x="1104" y="512" width="56" height="24" rx="4" fill="#FFFFFF" stroke="#F3B5B5"/>
+    <text x="1132" y="528" text-anchor="middle" font-size="10.5" font-weight="700" fill="#DC2626">Hapus</text>
+    <rect x="1044" y="564" width="52" height="24" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1070" y="580" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16233B">Edit</text>
+    <rect x="1044" y="616" width="52" height="24" rx="4" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1070" y="632" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16233B">Edit</text>
+    <rect x="1104" y="616" width="56" height="24" rx="4" fill="#FFFFFF" stroke="#F3B5B5"/>
+    <text x="1132" y="632" text-anchor="middle" font-size="10.5" font-weight="700" fill="#DC2626">Hapus</text>
+  </g>
+
+  <text x="288" y="690" font-size="11" fill="#8A97AD">Menampilkan 1–8 dari 120 nasabah</text>
+  <g>
+    <rect x="1090" y="674" width="34" height="28" rx="5" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1107" y="692" text-anchor="middle" font-size="12" fill="#5B6B85">‹</text>
+    <rect x="1130" y="674" width="34" height="28" rx="5" fill="#1D4ED8"/>
+    <text x="1147" y="692" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">1</text>
+    <rect x="1170" y="674" width="34" height="28" rx="5" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1187" y="692" text-anchor="middle" font-size="12" fill="#5B6B85">2</text>
+    <rect x="1210" y="674" width="34" height="28" rx="5" fill="#FFFFFF" stroke="#E1E6EF"/>
+    <text x="1227" y="692" text-anchor="middle" font-size="12" fill="#5B6B85">›</text>
+  </g>
+
+  <text x="640" y="764" text-anchor="middle" font-size="11" fill="#8A97AD">© 2026 BANK MINI Sekolah · Sistem Informasi E-Teller</text>
+</svg>

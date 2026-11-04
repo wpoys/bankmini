@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" font-family="'Segoe UI',Arial,sans-serif">
+  <defs>
+    <radialGradient id="g1" cx="85%" cy="0%" r="70%">
+      <stop offset="0%" stop-color="#7C6CF0" stop-opacity="0.30"/>
+      <stop offset="60%" stop-color="#7C6CF0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="0%" cy="100%" r="60%">
+      <stop offset="0%" stop-color="#1D4ED8" stop-opacity="0.38"/>
+      <stop offset="60%" stop-color="#1D4ED8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="960" height="640" fill="#07152F"/>
+  <rect width="960" height="640" fill="url(#g1)"/>
+  <rect width="960" height="640" fill="url(#g2)"/>
+
+  <rect x="278" y="30" width="404" height="580" rx="14" fill="#FFFFFF"/>
+
+  <circle cx="480" cy="88" r="34" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="3"/>
+  <text x="480" y="93" text-anchor="middle" font-size="13" font-weight="800" fill="#1D4ED8">SMK</text>
+  <text x="480" y="146" text-anchor="middle" font-size="22" font-weight="800" fill="#16233B">BANK MINI</text>
+  <text x="480" y="167" text-anchor="middle" font-size="12" fill="#5B6B85">Sistem Informasi E-Teller</text>
+
+  <rect x="310" y="196" width="340" height="40" rx="6" fill="#FFFFFF" stroke="#C9D0DC"/>
+  <rect x="310" y="196" width="42" height="40" rx="6" fill="#F4F6FA" stroke="#C9D0DC"/>
+  <path d="M326 222v-3a5 5 0 0 1 10 0v3" fill="none" stroke="#8A97AD" stroke-width="2"/>
+  <circle cx="331" cy="212" r="5" fill="none" stroke="#8A97AD" stroke-width="2"/>
+  <text x="364" y="221" font-size="12.5" fill="#8A97AD">Masukkan username atau email</text>
+
+  <rect x="310" y="256" width="340" height="40" rx="6" fill="#FFFFFF" stroke="#C9D0DC"/>
+  <rect x="310" y="256" width="42" height="40" rx="6" fill="#F4F6FA" stroke="#C9D0DC"/>
+  <rect x="324" y="272" width="14" height="11" rx="2" fill="none" stroke="#8A97AD" stroke-width="2"/>
+  <path d="M327 272v-3a4 4 0 0 1 8 0v3" fill="none" stroke="#8A97AD" stroke-width="2"/>
+  <text x="364" y="281" font-size="12.5" fill="#8A97AD">••••••••</text>
+
+  <rect x="310" y="314" width="13" height="13" rx="3" fill="#FFFFFF" stroke="#C9D0DC"/>
+  <text x="330" y="325" font-size="11.5" fill="#5B6B85">Ingat Saya</text>
+  <text x="650" y="325" text-anchor="end" font-size="11.5" fill="#1D4ED8" font-weight="600">Lupa Password?</text>
+
+  <rect x="310" y="348" width="340" height="44" rx="6" fill="#1D4ED8"/>
+  <path d="M420 370h10m-4-4 4 4-4 4" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="490" y="375" text-anchor="middle" font-size="13.5" font-weight="700" fill="#FFFFFF">Masuk ke Sistem</text>
+
+  <line x1="310" y1="416" x2="440" y2="416" stroke="#E1E6EF"/>
+  <line x1="520" y1="416" x2="650" y2="416" stroke="#E1E6EF"/>
+  <text x="480" y="420" text-anchor="middle" font-size="10.5" fill="#8A97AD">Akun demo</text>
+
+  <rect x="310" y="430" width="340" height="130" rx="6" fill="#FFFFFF" stroke="#E1E6EF"/>
+  <rect x="310" y="430" width="340" height="26" rx="6" fill="#F8FAFD"/>
+  <text x="322" y="447" font-size="9.5" font-weight="800" fill="#5B6B85" letter-spacing="0.5">ROLE</text>
+  <text x="418" y="447" font-size="9.5" font-weight="800" fill="#5B6B85" letter-spacing="0.5">USERNAME</text>
+  <text x="540" y="447" font-size="9.5" font-weight="800" fill="#5B6B85" letter-spacing="0.5">PASSWORD</text>
+  <line x1="310" y1="456" x2="650" y2="456" stroke="#E1E6EF"/>
+  <line x1="406" y1="430" x2="406" y2="560" stroke="#E1E6EF"/>
+  <line x1="528" y1="430" x2="528" y2="560" stroke="#E1E6EF"/>
+  <line x1="310" y1="482" x2="650" y2="482" stroke="#E1E6EF"/>
+  <line x1="310" y1="508" x2="650" y2="508" stroke="#E1E6EF"/>
+  <line x1="310" y1="534" x2="650" y2="534" stroke="#E1E6EF"/>
+
+  <rect x="320" y="464" width="46" height="13" rx="6.5" fill="#DBE8FF"/>
+  <text x="343" y="474" text-anchor="middle" font-size="8.5" font-weight="700" fill="#173DB4">Admin</text>
+  <text x="418" y="474" font-size="10" fill="#16233B" font-family="Consolas,monospace">admin</text>
+  <text x="540" y="474" font-size="10" fill="#16233B" font-family="Consolas,monospace">Admin@2026</text>
+
+  <rect x="320" y="490" width="46" height="13" rx="6.5" fill="#DEF2FB"/>
+  <text x="343" y="500" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369A1">Teller</text>
+  <text x="418" y="500" font-size="10" fill="#16233B" font-family="Consolas,monospace">teller1</text>
+  <text x="540" y="500" font-size="10" fill="#16233B" font-family="Consolas,monospace">Teller@2026</text>
+
+  <rect x="320" y="516" width="52" height="13" rx="6.5" fill="#FDF0D8"/>
+  <text x="346" y="526" text-anchor="middle" font-size="8.5" font-weight="700" fill="#D97706">Superv.</text>
+  <text x="418" y="526" font-size="10" fill="#16233B" font-family="Consolas,monospace">supervisor</text>
+  <text x="540" y="526" font-size="10" fill="#16233B" font-family="Consolas,monospace">Super@2026</text>
+
+  <rect x="320" y="542" width="52" height="13" rx="6.5" fill="#DFF4E6"/>
+  <text x="346" y="552" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803D">Nasabah</text>
+  <text x="418" y="552" font-size="10" fill="#16233B" font-family="Consolas,monospace">20241001</text>
+  <text x="540" y="552" font-size="10" fill="#16233B" font-family="Consolas,monospace">Nasabah@2026</text>
+
+  <text x="480" y="586" text-anchor="middle" font-size="11" fill="#8A97AD">Mudah, Aman, Terpercaya · Bank Mini Sekolah</text>
+</svg>

@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="860" viewBox="0 0 760 860" font-family="'Segoe UI',Arial,sans-serif">
+  <rect width="760" height="860" fill="#FFFFFF"/>
+  <text x="20" y="28" font-size="14" font-weight="700" fill="#98A2B3">WF-06</text>
+
+  <rect x="40" y="50" width="390" height="790" rx="24" fill="#FCFCFD" stroke="#98A2B3" stroke-width="2"/>
+
+  <rect x="40" y="50" width="390" height="70" fill="#F2F4F7" stroke="#98A2B3"/>
+  <rect x="62" y="76" width="20" height="18" rx="4" fill="#FFFFFF" stroke="#98A2B3"/>
+  <text x="96" y="92" font-size="14" font-weight="700" fill="#475467">Cek Saldo</text>
+  <rect x="346" y="72" width="34" height="34" rx="17" fill="#FFFFFF" stroke="#98A2B3"/>
+  <circle cx="372" cy="76" r="5" fill="#98A2B3"/>
+
+  <rect x="62" y="142" width="346" height="150" rx="10" fill="#FFFFFF" stroke="#98A2B3" stroke-width="2"/>
+  <text x="82" y="174" font-size="11" fill="#98A2B3">Saldo Rekening</text>
+  <text x="82" y="214" font-size="28" font-weight="700" fill="#475467">Rp 500.000</text>
+  <text x="82" y="242" font-size="11" fill="#667085">No. Rekening 0001 · a.n. Nama Nasabah</text>
+  <line x1="82" y1="256" x2="388" y2="256" stroke="#EAECF0"/>
+  <text x="82" y="278" font-size="10" fill="#98A2B3">Saldo minimum</text>
+  <text x="230" y="278" font-size="10" fill="#98A2B3">Dapat ditarik</text>
+  <text x="330" y="278" font-size="10" fill="#98A2B3">Rp 0</text>
+
+  <g fill="#FFFFFF" stroke="#98A2B3">
+    <rect x="62" y="312" width="166" height="86" rx="8"/>
+    <rect x="242" y="312" width="166" height="86" rx="8"/>
+  </g>
+  <text x="78" y="340" font-size="10" fill="#98A2B3">Total Setoran</text>
+  <text x="78" y="374" font-size="16" font-weight="700" fill="#475467">Rp 0</text>
+  <text x="258" y="340" font-size="10" fill="#98A2B3">Total Penarikan</text>
+  <text x="258" y="374" font-size="16" font-weight="700" fill="#475467">Rp 0</text>
+
+  <rect x="62" y="422" width="346" height="34" rx="6" fill="#FFFFFF" stroke="#98A2B3"/>
+  <rect x="62" y="422" width="34" height="34" rx="6" fill="#F2F4F7" stroke="#98A2B3"/>
+  <text x="106" y="443" font-size="11" fill="#98A2B3">Cari tanggal / nomor struk...</text>
+
+  <rect x="62" y="478" width="346" height="36" fill="#F9FAFB" stroke="#98A2B3"/>
+  <text x="74" y="501" font-size="11" font-weight="700" fill="#475467">Riwayat Mutasi</text>
+
+  <g>
+    <rect x="62" y="514" width="346" height="60" fill="#FFFFFF" stroke="#EAECF0"/>
+    <circle cx="90" cy="544" r="14" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <text x="116" y="538" font-size="11" font-weight="600" fill="#475467">Setoran Tunai</text>
+    <text x="116" y="558" font-size="10" fill="#98A2B3">12/10/2026 09:15 · STRK-0001</text>
+    <text x="396" y="548" text-anchor="end" font-size="12" font-weight="700" fill="#475467">+Rp 50.000</text>
+  </g>
+  <g>
+    <rect x="62" y="574" width="346" height="60" fill="#FFFFFF" stroke="#EAECF0"/>
+    <circle cx="90" cy="604" r="14" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <text x="116" y="598" font-size="11" font-weight="600" fill="#475467">Penarikan Tunai</text>
+    <text x="116" y="618" font-size="10" fill="#98A2B3">11/10/2026 10:02 · STRK-0002</text>
+    <text x="396" y="608" text-anchor="end" font-size="12" font-weight="700" fill="#475467">-Rp 20.000</text>
+  </g>
+  <g>
+    <rect x="62" y="634" width="346" height="60" fill="#FFFFFF" stroke="#EAECF0"/>
+    <circle cx="90" cy="664" r="14" fill="#F2F4F7" stroke="#D0D5DD"/>
+    <text x="116" y="658" font-size="11" font-weight="600" fill="#475467">Setoran Tunai</text>
+    <text x="116" y="678" font-size="10" fill="#98A2B3">10/10/2026 08:40 · STRK-0003</text>
+    <text x="396" y="668" text-anchor="end" font-size="12" font-weight="700" fill="#475467">+Rp 100.000</text>
+  </g>
+
+  <rect x="62" y="712" width="346" height="30" rx="6" fill="#FFFFFF" stroke="#98A2B3" stroke-dasharray="5 4"/>
+  <text x="235" y="731" text-anchor="middle" font-size="11" fill="#667085">Muat lebih banyak</text>
+
+  <rect x="40" y="770" width="390" height="70" fill="#F2F4F7" stroke="#98A2B3"/>
+  <g fill="#FFFFFF" stroke="#98A2B3">
+    <rect x="86" y="786" width="70" height="38" rx="6"/>
+    <rect x="186" y="786" width="70" height="38" rx="6"/>
+    <rect x="286" y="786" width="70" height="38" rx="6"/>
+  </g>
+  <g font-size="10" fill="#667085" text-anchor="middle">
+    <text x="121" y="809">Saldo</text>
+    <text x="221" y="809">Mutasi</text>
+    <text x="321" y="809">Profil</text>
+  </g>
+
+  <rect x="470" y="50" width="260" height="470" rx="8" fill="#FFFFFF" stroke="#98A2B3"/>
+  <text x="486" y="80" font-size="12" font-weight="700" fill="#475467">Versi layar lebar</text>
+  <text x="486" y="100" font-size="10" fill="#98A2B3">Halaman yang sama dengan</text>
+  <text x="486" y="116" font-size="10" fill="#98A2B3">sidebar navigasi + panel konten</text>
+  <rect x="486" y="134" width="70" height="370" fill="#F2F4F7" stroke="#98A2B3"/>
+  <rect x="568" y="134" width="146" height="34" fill="#FFFFFF" stroke="#98A2B3"/>
+  <rect x="568" y="180" width="146" height="140" fill="#FFFFFF" stroke="#98A2B3"/>
+  <rect x="568" y="332" width="146" height="172" fill="#FFFFFF" stroke="#98A2B3"/>
+  <g fill="#EAECF0">
+    <rect x="496" y="150" width="50" height="8" rx="3"/>
+    <rect x="496" y="172" width="50" height="8" rx="3"/>
+    <rect x="496" y="194" width="50" height="8" rx="3"/>
+    <rect x="496" y="216" width="50" height="8" rx="3"/>
+  </g>
+  <text x="576" y="360" font-size="10" fill="#98A2B3">Tabel riwayat mutasi</text>
+</svg>
