@@ -4,44 +4,14 @@
 @section('body-class', 'auth-page')
 
 @section('auth-body')
-    <div class="n-auth">
-        <svg class="n-auth-curve" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-                <linearGradient id="authPanelGradient" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="var(--n-slate)"></stop>
-                    <stop offset="100%" stop-color="var(--n-navy)"></stop>
-                </linearGradient>
-            </defs>
-            <path d="M0,0 L58,0 C66,18 64,45 56,70 C52,82 48,92 44,100 L0,100 Z" fill="url(#authPanelGradient)"></path>
-        </svg>
+    <div class="n-auth n-auth-minimal">
         <div class="n-auth-card">
-            <section class="n-auth-panel">
-                <div class="n-auth-panel-brand">
-                    <div class="n-auth-panel-top">
-                        <div class="n-auth-panel-heading">
-                            <div class="n-auth-panel-icon"><i class="fa-solid fa-building-columns"></i></div>
-                            <span>BANK MINI SMKN 1 BANTUL</span>
-                        </div>
-                    </div>
-                    <div class="n-auth-panel-main">
-                        <div class="n-auth-badge"><i class="fa-solid fa-circle"></i> Sistem Informasi E-Teller</div>
-                        <h1>Pengelolaan Finansial Praktik Sekolah Modern &amp; Aman.</h1>
-                        <p>Layanan perbankan sekolah yang aman dan terpercaya, dengan standar keamanan LSP Perbankan terintegrasi.</p>
-                        <div class="n-auth-features">
-                            <span><i class="fa-solid fa-shield-halved"></i> Keamanan Data Terjaga</span>
-                            <span><i class="fa-solid fa-list-check"></i> Audit Aktivitas Setiap Transaksi</span>
-                        </div>
-                    </div>
-                    <small class="n-auth-copyright">© 2026 Bank Mini SMKN 1 Bantul</small>
-                </div>
-            </section>
-
             <section class="n-auth-form-panel">
-                    <div class="n-auth-brand">
-                        <div class="n-auth-brand-mark">BANK MINI SMKN 1 BANTUL</div>
-                        <h2>Sign In</h2>
-                        <p>Silakan masukkan kredensial akun teller, supervisor, atau admin Anda.</p>
-                    </div>
+                <div class="n-auth-brand">
+                    <div class="n-auth-brand-mark"><i class="fa-solid fa-building-columns me-2"></i>BANK MINI SMKN 1 BANTUL</div>
+                    <h2>Selamat datang</h2>
+                    <p>Masuk ke akun teller, supervisor, atau administrator.</p>
+                </div>
 
                 @if (session('success'))
                     <div class="n-alert n-alert--sukses"><i class="fa-solid fa-circle-check"></i><span>{{ session('success') }}</span></div>

@@ -1,80 +1,98 @@
 @extends('layouts.app')
 
-@section('title', 'Notifikasi')
-@section('standalone-layout', 'true')
+@section('title', 'Pusat Notifikasi')
+@section('page-title', 'Pusat Notifikasi')
+@section('page-subtitle', 'Kelola dan pantau pemberitahuan akun Anda')
+@section('body-class', 'notification-center-page')
 
 @section('content')
-    <div class="n-simple-page page-animate">
-        <div class="n-simple-head">
-            <div class="n-simple-title">
-                <span class="n-simple-icon"><i class="fa-regular fa-bell"></i></span>
-                <div>
-                    <h1>Notifikasi</h1>
-                    <p>Pemberitahuan dan informasi terbaru untuk akun Anda.</p>
-                </div>
+    <div class="notification-center">
+        <section class="notification-list-panel">
+            <div class="notification-tabs">
+                <a class="{{ $status === 'semua' ? 'active' : '' }}" href="{{ route('notifikasi.index', array_filter(['q' => $q])) }}">
+                    Semua Notifikasi <span>{{ $jumlahTotal }}</span>
+                </a>
+                <a class="{{ $status === 'belum' ? 'active' : '' }}" href="{{ route('notifikasi.index', array_filter(['status' => 'belum', 'q' => $q])) }}">
+                    Belum Dibaca <span>{{ $jumlahBelumDibaca }}</span>
+                </a>
             </div>
-            <a class="n-simple-back" href="{{ url('/') }}"><i class="fa-solid fa-arrow-left"></i>Kembali</a>
-        </div>
 
-        <div class="n-simple-grid">
-            <section class="n-simple-list-card">
-                <div class="n-simple-toolbar">
-                    <div class="n-simple-tabs" role="tablist">
-                        <button type="button" class="is-active" data-n-filter-notif="semua" aria-selected="true">Semua <b>{{ $jumlahTotal }}</b></button>
-                        <button type="button" data-n-filter-notif="belum" aria-selected="false">Belum Dibaca <b>{{ $jumlahBelumDibaca }}</b></button>
-                    </div>
-                    <div class="n-simple-tools">
-                        <label><i class="fa-solid fa-magnifying-glass"></i><input type="search" data-n-simple-search placeholder="Cari notifikasi..."></label>
-                        <select data-n-simple-period aria-label="Filter periode">
-                            <option value="7">7 Hari Terakhir</option>
-                            <option value="30">30 Hari Terakhir</option>
-                            <option value="all">Semua Periode</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="n-simple-notifications">
-                    @forelse ($notifikasi as $n)
-                        @php $tipe = in_array($n->tipe, ['success', 'warning', 'danger', 'info']) ? $n->tipe : 'info'; @endphp
-                        <article class="n-simple-item {{ ! $n->sudah_dibaca ? 'is-unread' : '' }}" data-n-simple-item data-n-notif data-n-unread="{{ $n->sudah_dibaca ? '0' : '1' }}" data-n-search="{{ $n->judul }} {{ $n->pesan }}" data-n-time="{{ $n->created_at->timestamp }}">
-                            <span class="n-simple-item-icon n-simple-item-icon--{{ $tipe }}"><i class="fa-solid {{ $n->icon }}"></i></span>
-                            <div class="n-simple-item-body">
-                                <div class="n-simple-item-top"><strong>{{ $n->judul }}</strong><time>{{ $n->created_at->diffForHumans() }}</time></div>
-                                <p>{{ $n->pesan }}</p>
-                                <div class="n-simple-actions">
-                                    @if (! $n->sudah_dibaca)
-                                        <form method="POST" action="{{ route('notifikasi.baca', $n->id) }}">@csrf<button type="submit"><i class="fa-solid fa-check"></i>Tandai dibaca</button></form>
-                                    @endif
-                                    <form method="POST" action="{{ route('notifikasi.hapus', $n->id) }}" data-n-konfirmasi="Hapus notifikasi ini?" data-n-judul="Hapus Notifikasi">@csrf @method('DELETE')<button type="submit"><i class="fa-regular fa-trash-can"></i>Hapus</button></form>
-                                </div>
-                            </div>
-                        </article>
-                    @empty
-                        <div class="n-simple-empty"><i class="fa-regular fa-bell"></i><strong>Belum ada notifikasi</strong><span>Notifikasi untuk akun Anda akan tampil di sini.</span></div>
-                    @endforelse
-                </div>
-                @if ($notifikasi->hasPages())
-                    <div class="n-simple-pagination">{{ $notifikasi->links() }}</div>
+            <form class="notification-search" method="GET" action="{{ route('notifikasi.index') }}">
+                @if ($status === 'belum')
+                    <input type="hidden" name="status" value="belum">
                 @endif
-            </section>
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" name="q" value="{{ $q }}" placeholder="Cari notifikasi, transaksi, atau aktivitas..." aria-label="Cari notifikasi">
+                @if ($q !== '')
+                    <a href="{{ route('notifikasi.index', $status === 'belum' ? ['status' => 'belum'] : []) }}" aria-label="Hapus pencarian"><i class="fa-solid fa-xmark"></i></a>
+                @endif
+            </form>
 
-            <aside class="n-simple-side-card">
-                <section>
-                    <div class="n-simple-card-title"><strong>Ringkasan Status</strong><span>LIVE</span></div>
-                    <div class="n-simple-stats">
-                        <div><strong>{{ $jumlahBelumDibaca }}</strong><span>BELUM DIBACA</span></div>
-                        <div><strong>{{ $jumlahSudahDibaca }}</strong><span>SUDAH DIBACA</span></div>
+            <div class="notification-list-heading">
+                <label><input type="checkbox" aria-label="Pilih semua notifikasi"> Pilih Semua</label>
+                <span>{{ $notifikasi->total() }} notifikasi</span>
+            </div>
+
+            <div class="notification-list">
+                @forelse ($notifikasi as $n)
+                    @php $tipe = in_array($n->tipe, ['success', 'warning', 'danger', 'info']) ? $n->tipe : 'info'; @endphp
+                    <a class="notification-row {{ ! $n->sudah_dibaca ? 'unread' : '' }} {{ $selected && $selected->id === $n->id ? 'selected' : '' }}" href="{{ route('notifikasi.index', array_filter(['status' => $status === 'belum' ? 'belum' : null, 'q' => $q ?: null, 'selected' => $n->id, 'page' => $notifikasi->currentPage() > 1 ? $notifikasi->currentPage() : null])) }}">
+                        <span class="notification-row-icon type-{{ $tipe }}"><i class="fa-solid {{ $n->icon }}"></i></span>
+                        <span class="notification-row-content">
+                            <span class="notification-row-title">{{ $n->judul }}</span>
+                            <span class="notification-row-message">{{ $n->pesan }}</span>
+                            <span class="notification-row-meta"><span class="notification-type-label type-{{ $tipe }}">{{ ucfirst($tipe) }}</span><time>{{ $n->created_at->diffForHumans() }}</time></span>
+                        </span>
+                        @unless ($n->sudah_dibaca)<span class="notification-unread-dot" title="Belum dibaca"></span>@endunless
+                    </a>
+                @empty
+                    <div class="notification-empty"><i class="fa-regular fa-bell"></i><strong>Tidak ada notifikasi</strong><span>Coba ubah filter atau kata kunci pencarian.</span></div>
+                @endforelse
+            </div>
+            @if ($notifikasi->hasPages())
+                <div class="notification-pagination">{{ $notifikasi->links() }}</div>
+            @endif
+        </section>
+
+        <aside class="notification-detail-panel">
+            @if ($selected)
+                @php $detailType = in_array($selected->tipe, ['success', 'warning', 'danger', 'info']) ? $selected->tipe : 'info'; @endphp
+                <div class="notification-detail-toolbar">
+                    <span><i class="fa-regular fa-envelope"></i></span>
+                    <span><i class="fa-regular fa-flag"></i></span>
+                    <form method="POST" action="{{ route('notifikasi.hapus', $selected->id) }}" data-n-konfirmasi="Hapus notifikasi ini?" data-n-judul="Hapus Notifikasi">
+                        @csrf @method('DELETE')
+                        <button type="submit" aria-label="Hapus notifikasi"><i class="fa-regular fa-trash-can"></i></button>
+                    </form>
+                    <button type="button" aria-label="Menu lainnya"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                </div>
+                <div class="notification-detail-content">
+                    <div class="notification-detail-heading">
+                        <h2>{{ $selected->judul }}</h2>
+                        @if ($selected->sudah_dibaca)
+                            <span class="notification-status read"><i class="fa-solid fa-check"></i> Sudah Dibaca</span>
+                        @else
+                            <span class="notification-status unread"><i class="fa-solid fa-circle"></i> Belum Dibaca</span>
+                        @endif
                     </div>
-                    <div class="n-simple-total"><strong>{{ $jumlahTotal }}</strong><span>TOTAL MASUK PER NOTIFIKASI</span></div>
-                    <div class="n-simple-sync"><i class="fa-solid fa-arrows-rotate"></i><span><strong>Sinkronisasi Otomatis</strong><small>Notifikasi diperbarui saat halaman dibuka</small></span></div>
-                </section>
-                <section class="n-simple-preferences">
-                    <div class="n-simple-card-title"><strong>Preferensi Notifikasi Cepat</strong></div>
-                    <label><span><strong>Transaksi Loket Kasir</strong><small>Setoran tunai & penarikan buku kas</small></span><input type="checkbox" checked><i></i></label>
-                    <label><span><strong>Keamanan & Privasi</strong><small>Pengajuan PIN, reset & log sesi</small></span><input type="checkbox" checked><i></i></label>
-                    <label><span><strong>Pengumuman Sekolah</strong><small>Informasi operasional & kegiatan</small></span><input type="checkbox" checked><i></i></label>
-                    <button type="button" class="n-simple-save">Simpan Preferensi</button>
-                </section>
-            </aside>
-        </div>
+                    <div class="notification-detail-type type-{{ $detailType }}"><span class="notification-row-icon type-{{ $detailType }}"><i class="fa-solid {{ $selected->icon }}"></i></span><span><strong>{{ ucfirst($detailType) }}</strong><small>{{ $selected->created_at->translatedFormat('d F Y, H:i') }}</small></span></div>
+                    <div class="notification-detail-body">
+                        <h3>Rincian</h3>
+                        <p>{{ $selected->pesan }}</p>
+                    </div>
+                    @if ($selected->url)
+                        <a class="notification-detail-link" href="{{ $selected->url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Buka informasi terkait</a>
+                    @endif
+                    @unless ($selected->sudah_dibaca)
+                        <form method="POST" action="{{ route('notifikasi.baca', $selected->id) }}" class="notification-read-form">
+                            @csrf
+                            <button type="submit"><i class="fa-solid fa-check"></i> Tandai Sudah Dibaca</button>
+                        </form>
+                    @endunless
+                </div>
+            @else
+                <div class="notification-detail-empty"><span><i class="fa-regular fa-envelope-open"></i></span><strong>Pilih notifikasi</strong><p>Pilih salah satu notifikasi dari daftar untuk melihat rincian lengkapnya.</p></div>
+            @endif
+        </aside>
     </div>
 @endsection

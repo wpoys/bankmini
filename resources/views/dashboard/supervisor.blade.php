@@ -5,14 +5,8 @@
 @section('page-subtitle', 'Verifikasi laporan harian para teller')
 
 @section('content')
-    <div class="page-animate">
-        <div class="page-header">
-            <div>
-                <h1>Dashboard Verifikasi</h1>
-                <div class="page-header-sub">
-                    Laporan kas teller — {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
-                </div>
-            </div>
+    <div class="page-animate supervisor-dashboard">
+        <div class="page-header dashboard-content-header">
             <div class="header-actions">
                 <span class="status-badge green">Sistem Aktif</span>
                 <a href="{{ route('supervisor.verifikasi.index') }}" class="quick-action">
@@ -24,8 +18,8 @@
             </div>
         </div>
 
-        <div class="row g-3 mb-3">
-            <div class="col-6 col-xl-3">
+        <div class="row g-3 mb-3 justify-content-center">
+            <div class="col-6 col-xl-2">
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Menunggu Verifikasi</span>
@@ -33,10 +27,20 @@
                                 class="fa-solid fa-hourglass-half"></i></span>
                     </div>
                     <div class="stat-value">{{ number_format($laporanPending, 0, ',', '.') }}</div>
-                    <div class="stat-hint">Dalam antrean approval</div>
+                    <div class="stat-hint">Perlu ditindaklanjuti</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-xl-2">
+                <div class="stat-card h-100">
+                    <div class="stat-top">
+                        <span class="stat-label">Koreksi Transaksi</span>
+                        <span class="stat-icon bg-danger-subtle text-danger"><i class="fa-solid fa-rotate-left"></i></span>
+                    </div>
+                    <div class="stat-value">{{ number_format($koreksiPending, 0, ',', '.') }}</div>
+                    <div class="stat-hint">Menunggu persetujuan</div>
+                </div>
+            </div>
+            <div class="col-6 col-xl-2">
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Disetujui</span>
@@ -44,20 +48,20 @@
                                 class="fa-solid fa-circle-check"></i></span>
                     </div>
                     <div class="stat-value">{{ number_format($laporanDisetujui, 0, ',', '.') }}</div>
-                    <div class="stat-hint">Rekonsiliasi sesuai</div>
+                    <div class="stat-hint">Laporan disetujui · total</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-xl-2">
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Ditolak</span>
                         <span class="stat-icon bg-danger-subtle text-danger"><i class="fa-solid fa-circle-xmark"></i></span>
                     </div>
                     <div class="stat-value">{{ number_format($laporanDitolak, 0, ',', '.') }}</div>
-                    <div class="stat-hint">Perlu koreksi teller</div>
+                    <div class="stat-hint">Laporan ditolak · total</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div class="col-6 col-xl-2">
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Pengajuan PIN</span>
@@ -65,6 +69,39 @@
                     </div>
                     <div class="stat-value">{{ number_format($permintaanPinPending, 0, ',', '.') }}</div>
                     <div class="stat-hint">Menunggu persetujuan</div>
+                </div>
+            </div>
+            <div class="col-6 col-xl-2">
+                <div class="stat-card h-100">
+                    <div class="stat-top">
+                        <span class="stat-label">Nasabah Aktif</span>
+                        <span class="stat-icon bg-info-subtle text-info"><i class="fa-solid fa-users"></i></span>
+                    </div>
+                    <div class="stat-value">{{ number_format($nasabahAktif, 0, ',', '.') }}</div>
+                    <div class="stat-hint">Rekening tidak diarsipkan</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-panel mb-3 supervisor-cash-summary">
+            <div class="panel-head">
+                <div class="panel-title"><span class="dot" style="background:var(--cyan)"></span>Ringkasan Kas Bulan Ini</div>
+                <span class="small text-muted">{{ now()->startOfMonth()->format('d M') }}–{{ now()->format('d M Y') }}</span>
+            </div>
+            <div class="supervisor-cash-values">
+                <div class="supervisor-cash-item">
+                    <div class="supervisor-cash-icon text-success"><i class="fa-solid fa-arrow-down"></i></div>
+                    <div class="supervisor-cash-detail">
+                        <span>Total Setoran</span>
+                        <strong>Rp {{ number_format($totalSetoranBulanIni, 0, ',', '.') }}</strong>
+                    </div>
+                </div>
+                <div class="supervisor-cash-item">
+                    <div class="supervisor-cash-icon text-danger"><i class="fa-solid fa-arrow-up"></i></div>
+                    <div class="supervisor-cash-detail">
+                        <span>Total Penarikan</span>
+                        <strong>Rp {{ number_format($totalPenarikanBulanIni, 0, ',', '.') }}</strong>
+                    </div>
                 </div>
             </div>
         </div>
@@ -202,26 +239,6 @@
                     </div>
                 </div>
 
-                <div class="data-panel">
-                    <div class="panel-head">
-                        <div class="panel-title"><span class="dot"></span>Riwayat Verifikasi</div>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        @forelse ($history as $h)
-                            <li class="list-group-item d-flex justify-content-between align-items-center py-2">
-                                <div>
-                                    <div class="small fw-semibold">{{ $h->teller->nama_petugas }}</div>
-                                    <small class="text-muted">{{ $h->tanggal->format('d M Y') }} ·
-                                        {{ $h->approver?->nama_petugas }}</small>
-                                </div>
-                                <span
-                                    class="status-badge {{ $h->status === 'disetujui' ? 'green' : 'red' }}">{{ $h->status_label }}</span>
-                            </li>
-                        @empty
-                            <li class="list-group-item text-center text-muted small py-4">Belum ada riwayat</li>
-                        @endforelse
-                    </ul>
-                </div>
             </div>
         </div>
     </div>

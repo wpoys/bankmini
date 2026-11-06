@@ -22,16 +22,18 @@ class LaporanController extends Controller
     public function dashboard(): View
     {
         $totalSetoranBulanIni = (int) Transaksi::where('jenis_trans', 'setoran')
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->whereYear('tanggal', now()->year)
             ->whereMonth('tanggal', now()->month)
             ->sum('nominal');
 
         $totalPenarikanBulanIni = (int) Transaksi::where('jenis_trans', 'penarikan')
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->whereYear('tanggal', now()->year)
             ->whereMonth('tanggal', now()->month)
             ->sum('nominal');
 
-        $jumlahTransaksi = (int) Transaksi::count();
+        $jumlahTransaksi = (int) Transaksi::where('status', Transaksi::STATUS_APPROVED)->count();
         $totalSimpanan = (int) Nasabah::sum('saldo');
         $jumlahNasabah = (int) Nasabah::count();
 
@@ -44,6 +46,147 @@ class LaporanController extends Controller
             'totalSimpanan',
             'jumlahNasabah',
             'transaksiBulan',
+        ));
+    }
+
+    public function laporanOperasional(Request $request): View|Response|RedirectResponse
+    {
+        $validated = $request->validate([
+            'periode' => ['nullable', 'in:harian,bulanan,tahunan,rentang'],
+            'tanggal' => ['nullable', 'date'],
+            'bulan' => ['nullable', 'date_format:Y-m'],
+            'tahun' => ['nullable', 'integer', 'min:2000', 'max:2100'],
+            'mulai' => ['nullable', 'date'],
+            'sampai' => ['nullable', 'date', 'after_or_equal:mulai'],
+            'teller' => ['nullable', 'integer'],
+        ]);
+
+        $periode = $validated['periode'] ?? 'bulanan';
+        $tellerTerpilih = isset($validated['teller']) && (int) $validated['teller'] > 0
+            ? User::where('role', User::ROLE_TELLER)->find((int) $validated['teller'])
+            : null;
+        $tellerId = $tellerTerpilih?->id;
+
+        if ($periode === 'harian') {
+            $hari = Carbon::parse($validated['tanggal'] ?? today()->toDateString());
+            $mulai = $hari->copy()->startOfDay();
+            $sampai = $hari->copy()->endOfDay();
+        } elseif ($periode === 'bulanan') {
+            $bulan = $validated['bulan'] ?? now()->format('Y-m');
+            $mulai = Carbon::createFromFormat('!Y-m-d', $bulan.'-01')->startOfDay();
+            $sampai = $mulai->copy()->endOfMonth()->endOfDay();
+            if ($mulai->isSameMonth(today())) {
+                $sampai = today()->endOfDay();
+            }
+        } elseif ($periode === 'tahunan') {
+            $tahun = (int) ($validated['tahun'] ?? now()->year);
+            $mulai = Carbon::create($tahun, 1, 1)->startOfDay();
+            $sampai = Carbon::create($tahun, 12, 31)->endOfDay();
+            if ($tahun === today()->year) {
+                $sampai = today()->endOfDay();
+            }
+        } else {
+            if (empty($validated['mulai']) || empty($validated['sampai'])) {
+                return back()->withErrors(['mulai' => 'Tanggal mulai dan sampai wajib dipilih untuk rentang tanggal.'])->withInput();
+            }
+
+            $mulai = Carbon::parse($validated['mulai'])->startOfDay();
+            $sampai = Carbon::parse($validated['sampai'])->endOfDay();
+        }
+
+        if ($request->filled('format') && in_array($request->input('format'), ['excel', 'pdf'], true)) {
+            $request->merge([
+                'mulai' => $mulai->toDateString(),
+                'sampai' => $sampai->toDateString(),
+                'teller' => $tellerId,
+            ]);
+
+            return $this->laporanHarian($request);
+        }
+
+        $laporan = LaporanHarian::with(['teller', 'rekonsiliasi.detail'])
+            ->whereBetween('tanggal', [$mulai, $sampai])
+            ->when($tellerId, fn ($query) => $query->where('teller_id', $tellerId))
+            ->orderBy('tanggal')
+            ->orderBy('id')
+            ->get();
+
+        $transaksi = Transaksi::with(['nasabah', 'user'])
+            ->whereBetween('tanggal', [$mulai, $sampai])
+            ->whereNull('koreksi_id')
+            ->where('status', Transaksi::STATUS_APPROVED)
+            ->when($tellerId, fn ($query) => $query->where('id_user', $tellerId))
+            ->orderBy('tanggal')
+            ->orderBy('id')
+            ->get();
+
+        $totalSetoran = (int) $transaksi->where('jenis_trans', Transaksi::JENIS_SETORAN)->sum('nominal');
+        $totalPenarikan = (int) $transaksi->where('jenis_trans', Transaksi::JENIS_PENARIKAN)->sum('nominal');
+        $totalTransaksi = $transaksi->count();
+        $saldoAwalPeriode = (int) $laporan->groupBy('teller_id')
+            ->sum(fn (Collection $laporanTeller) => (int) $laporanTeller->first()->saldo_awal_kas);
+        $saldoAkhirPeriode = $saldoAwalPeriode + $totalSetoran - $totalPenarikan;
+        $jumlahHari = $laporan->pluck('tanggal')->map(fn ($tanggal) => $tanggal->format('Y-m-d'))->unique()->count();
+        ['saldoAwal' => $saldoAwal, 'mutasi' => $mutasi] = $this->dataBukuBesar($mulai, $sampai, null, $tellerId);
+
+        if ($periode === 'harian') {
+            $chartMode = 'jam';
+            $chartLabels = [];
+            $chartSetoran = array_fill(0, 24, 0);
+            $chartPenarikan = array_fill(0, 24, 0);
+            for ($jam = 0; $jam < 24; $jam++) {
+                $chartLabels[] = sprintf('%02d:00', $jam);
+            }
+            foreach ($transaksi as $item) {
+                $jam = (int) $item->created_at->format('G');
+                if ($item->jenis_trans === Transaksi::JENIS_SETORAN) {
+                    $chartSetoran[$jam] += (int) $item->nominal;
+                } elseif ($item->jenis_trans === Transaksi::JENIS_PENARIKAN) {
+                    $chartPenarikan[$jam] += (int) $item->nominal;
+                }
+            }
+        } elseif ($periode === 'bulanan' || ($periode === 'rentang' && $mulai->diffInDays($sampai) < 32)) {
+            $chartMode = 'hari';
+            $jumlahHariGrafik = (int) $mulai->copy()->startOfDay()->diffInDays($sampai->copy()->startOfDay()) + 1;
+            $chartLabels = [];
+            $chartSetoran = array_fill(0, $jumlahHariGrafik, 0);
+            $chartPenarikan = array_fill(0, $jumlahHariGrafik, 0);
+            for ($hariKe = 0; $hariKe < $jumlahHariGrafik; $hariKe++) {
+                $chartLabels[] = $mulai->copy()->addDays($hariKe)->format('d/m');
+            }
+            foreach ($transaksi as $item) {
+                $index = (int) $mulai->copy()->startOfDay()->diffInDays($item->tanggal->copy()->startOfDay());
+                if ($item->jenis_trans === Transaksi::JENIS_SETORAN) {
+                    $chartSetoran[$index] += (int) $item->nominal;
+                } elseif ($item->jenis_trans === Transaksi::JENIS_PENARIKAN) {
+                    $chartPenarikan[$index] += (int) $item->nominal;
+                }
+            }
+        } else {
+            $chartMode = 'bulan';
+            $jumlahBulan = (int) $mulai->copy()->startOfMonth()->diffInMonths($sampai->copy()->startOfMonth()) + 1;
+            $chartLabels = [];
+            $chartSetoran = array_fill(0, $jumlahBulan, 0);
+            $chartPenarikan = array_fill(0, $jumlahBulan, 0);
+            for ($bulanKe = 0; $bulanKe < $jumlahBulan; $bulanKe++) {
+                $chartLabels[] = $mulai->copy()->addMonthsNoOverflow($bulanKe)->translatedFormat('M Y');
+            }
+            foreach ($transaksi as $item) {
+                $index = (int) $mulai->copy()->startOfMonth()->diffInMonths($item->tanggal->copy()->startOfMonth());
+                if ($item->jenis_trans === Transaksi::JENIS_SETORAN) {
+                    $chartSetoran[$index] += (int) $item->nominal;
+                } elseif ($item->jenis_trans === Transaksi::JENIS_PENARIKAN) {
+                    $chartPenarikan[$index] += (int) $item->nominal;
+                }
+            }
+        }
+
+        $tellerList = User::where('role', User::ROLE_TELLER)->orderBy('nama_petugas')->get(['id', 'nama_petugas']);
+
+        return view('supervisor.laporan.operasional', compact(
+            'periode', 'mulai', 'sampai', 'tellerList', 'tellerTerpilih', 'laporan', 'transaksi',
+            'totalSetoran', 'totalPenarikan', 'totalTransaksi', 'saldoAwalPeriode', 'saldoAkhirPeriode',
+            'jumlahHari', 'saldoAwal', 'mutasi', 'chartMode', 'chartLabels', 'chartSetoran', 'chartPenarikan',
         ));
     }
 
@@ -75,6 +218,7 @@ class LaporanController extends Controller
 
         $totalTransaksi = Transaksi::whereBetween('tanggal', [$mulai, $sampai])
             ->whereNull('koreksi_id')
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->when($tellerId, fn ($q) => $q->where('id_user', $tellerId))
             ->count();
 
@@ -290,6 +434,7 @@ class LaporanController extends Controller
         $transaksi = Transaksi::with(['nasabah', 'user'])
             ->whereBetween('tanggal', [$mulai, $sampai])
             ->whereNull('koreksi_id')
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->when($nasabah, fn ($query) => $query->where('id_nasabah', $nasabah->id))
             ->when($tellerId, fn ($query) => $query->where('id_user', $tellerId))
             ->orderBy('tanggal')
@@ -298,6 +443,7 @@ class LaporanController extends Controller
 
         $saldoAwal = (int) Transaksi::where('tanggal', '<', $mulai)
             ->whereNull('koreksi_id')
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->when($nasabah, fn ($query) => $query->where('id_nasabah', $nasabah->id))
             ->when($tellerId, fn ($query) => $query->where('id_user', $tellerId))
             ->sum(DB::raw('CASE WHEN jenis_trans = "setoran" THEN nominal ELSE -nominal END'));
@@ -343,6 +489,7 @@ class LaporanController extends Controller
             $mutasi = $nasabah->transaksi()
                 ->whereBetween('tanggal', [$mulai, $sampai])
                 ->where('koreksi_id', null)
+                ->where('status', Transaksi::STATUS_APPROVED)
                 ->orderBy('tanggal')
                 ->orderBy('id')
                 ->get();
@@ -350,6 +497,7 @@ class LaporanController extends Controller
             $saldoAwal = (int) Transaksi::where('id_nasabah', $nasabah->id)
                 ->where('tanggal', '<', $mulai)
                 ->where('koreksi_id', null)
+                ->where('status', Transaksi::STATUS_APPROVED)
                 ->sum(DB::raw('CASE WHEN jenis_trans = "setoran" THEN nominal ELSE -nominal END'));
 
             $running = $saldoAwal;
@@ -463,6 +611,7 @@ class LaporanController extends Controller
 
         $data = Transaksi::whereYear('tanggal', $tahun)
             ->where('koreksi_id', null)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->selectRaw('jenis_trans, COUNT(*) as jumlah, SUM(nominal) as nominal')
             ->groupBy('jenis_trans')
             ->get()
@@ -479,8 +628,8 @@ class LaporanController extends Controller
             $m = str_pad((string) $bulan, 2, '0', STR_PAD_LEFT);
             $perBulan[] = [
                 'bulan' => Carbon::create()->month($bulan)->translatedFormat('F'),
-                'setoran' => (int) Transaksi::whereYear('tanggal', $tahun)->whereMonth('tanggal', $bulan)->where('jenis_trans', 'setoran')->where('koreksi_id', null)->sum('nominal'),
-                'penarikan' => (int) Transaksi::whereYear('tanggal', $tahun)->whereMonth('tanggal', $bulan)->where('jenis_trans', 'penarikan')->where('koreksi_id', null)->sum('nominal'),
+                'setoran' => (int) Transaksi::whereYear('tanggal', $tahun)->whereMonth('tanggal', $bulan)->where('status', Transaksi::STATUS_APPROVED)->where('jenis_trans', 'setoran')->where('koreksi_id', null)->sum('nominal'),
+                'penarikan' => (int) Transaksi::whereYear('tanggal', $tahun)->whereMonth('tanggal', $bulan)->where('status', Transaksi::STATUS_APPROVED)->where('jenis_trans', 'penarikan')->where('koreksi_id', null)->sum('nominal'),
             ];
         }
 
@@ -521,11 +670,13 @@ class LaporanController extends Controller
 
             $setoran[] = (int) Transaksi::whereYear('tanggal', $bulan->year)
                 ->whereMonth('tanggal', $bulan->month)
+                ->where('status', Transaksi::STATUS_APPROVED)
                 ->where('jenis_trans', 'setoran')
                 ->sum('nominal');
 
             $penarikan[] = (int) Transaksi::whereYear('tanggal', $bulan->year)
                 ->whereMonth('tanggal', $bulan->month)
+                ->where('status', Transaksi::STATUS_APPROVED)
                 ->where('jenis_trans', 'penarikan')
                 ->sum('nominal');
         }

@@ -4,6 +4,7 @@
 @section('page-title', 'Buku Besar / Kartu Simpanan')
 @section('page-subtitle', 'Pergerakan mutasi seluruh simpanan nasabah')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">

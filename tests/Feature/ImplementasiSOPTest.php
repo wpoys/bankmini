@@ -222,7 +222,7 @@ it('records koreksi nominal and applies it on approval', function () {
 
     $this->actingAs($supervisor)
         ->post("/supervisor/koreksi/{$koreksi->id}/approve")
-        ->assertRedirect(route('supervisor.koreksi.index'));
+        ->assertRedirect(route('supervisor.pusat-verifikasi', ['tab' => 'koreksi', 'status' => 'menunggu_approval']));
 
     $nasabah->refresh();
     expect($nasabah->saldo)->toBe($saldoAwal + 50000 - 30000);
@@ -263,7 +263,7 @@ it('does not change saldo when koreksi is rejected', function () {
     $this->actingAs($supervisor)
         ->post("/supervisor/koreksi/{$koreksi->id}/tolak", [
             'catatan_approver' => 'Data sudah benar',
-        ])->assertRedirect(route('supervisor.koreksi.index'));
+        ])->assertRedirect(route('supervisor.pusat-verifikasi', ['tab' => 'koreksi', 'status' => 'menunggu_approval']));
 
     $nasabah->refresh();
     expect($nasabah->saldo)->toBe($saldoAwal + 50000);

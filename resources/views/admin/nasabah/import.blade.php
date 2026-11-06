@@ -13,6 +13,15 @@
             </div>
         </div>
 
+        <div class="nav nav-tabs mb-3" role="tablist" aria-label="Manajemen pengguna">
+            <a class="nav-link" href="{{ route('admin.users.index') }}">
+                <i class="fa-solid fa-users me-1"></i>Manajemen User
+            </a>
+            <a class="nav-link active" href="{{ route('admin.nasabah.import') }}" aria-current="page">
+                <i class="fa-solid fa-file-import me-1"></i>Impor Nasabah
+            </a>
+        </div>
+
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="data-panel mb-3">

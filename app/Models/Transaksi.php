@@ -49,7 +49,7 @@ use Illuminate\Support\Facades\Gate;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, JurnalAkuntansi> $jurnal
  * @property-read \Illuminate\Database\Eloquent\Collection<int, DetailLaporan> $detailLaporan
  */
-#[Fillable(['id_nasabah', 'id_user', 'tanggal', 'jenis_trans', 'nominal', 'konfirmasi_h1', 'catatan', 'no_struk', 'status', 'dikoreksi', 'koreksi_id'])]
+#[Fillable(['id_nasabah', 'id_user', 'tanggal', 'jenis_trans', 'nominal', 'konfirmasi_h1', 'catatan', 'no_struk', 'status', 'dikoreksi', 'koreksi_id', 'kadaluarsa_pada', 'otorisasi_percobaan', 'token_otorisasi'])]
 class Transaksi extends Model
 {
     use HasFactory;
@@ -68,6 +68,8 @@ class Transaksi extends Model
 
     public const STATUS_DITOLAK = 'ditolak';
 
+    public const STATUS_KEDALUWARSA = 'kedaluwarsa';
+
     protected $table = 'transaksi';
 
     /**
@@ -83,6 +85,8 @@ class Transaksi extends Model
             'tanggal' => 'date',
             'nominal' => 'integer',
             'konfirmasi_h1' => 'boolean',
+            'kadaluarsa_pada' => 'datetime',
+            'otorisasi_percobaan' => 'integer',
         ];
     }
 
@@ -133,6 +137,7 @@ class Transaksi extends Model
             self::STATUS_PENDING => 'Pending',
             self::STATUS_APPROVED => 'Approved',
             self::STATUS_DITOLAK => 'Ditolak',
+            self::STATUS_KEDALUWARSA => 'Kedaluwarsa',
             default => ucfirst((string) $this->status),
         };
     }
@@ -160,8 +165,8 @@ class Transaksi extends Model
      *
      * Dihitung dari ledger transaksi (tidak bergantung pada kolom saldo
      * saat ini) agar struk tetap benar walau sudah ada transaksi berikutnya.
-     * Transaksi berstatus "ditolak" tidak dihitung karena tidak pernah
-     * mengubah saldo rekening.
+     * Hanya transaksi berstatus "approved" yang dihitung karena transaksi
+     * pending, ditolak, dan kedaluwarsa tidak mengubah saldo rekening.
      */
     public function getSaldoSebelumAttribute(): int
     {
@@ -177,7 +182,7 @@ class Transaksi extends Model
 
         $query = static::query()
             ->where('id_nasabah', $this->id_nasabah)
-            ->where('status', '!=', self::STATUS_DITOLAK)
+            ->where('status', self::STATUS_APPROVED)
             ->where(function ($q) use ($tanggal) {
                 $q->whereDate('tanggal', '<', $tanggal)
                     ->orWhere(function ($q) use ($tanggal) {

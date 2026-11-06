@@ -4,6 +4,7 @@
 @section('page-title', 'Persetujuan Pengajuan PIN')
 @section('page-subtitle', 'Admin dan Supervisor memiliki hak persetujuan yang sama. Cukup salah satu memproses.')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -80,14 +81,18 @@
                                 <td class="text-end">
                                     @if ($p->bisa_diproses)
                                         <div class="d-flex gap-1 justify-content-end">
-                                            <form method="POST" action="{{ route('permintaan-pin.setujui', $p->id) }}"
-                                                  data-confirm="Setujui pengajuan perubahan PIN {{ $p->nasabah?->nama_siswa ?? '' }}? PIN baru akan langsung berlaku."
-                                                  data-confirm-title="Setujui Pengajuan PIN">
-                                                @csrf
-                                                <button class="btn btn-sm btn-success" title="Setujui">
-                                                    <i class="fa-solid fa-check me-1"></i>Setujui
-                                                </button>
-                                            </form>
+                                            @if ($p->ada_pin_baru)
+                                                <form method="POST" action="{{ route('permintaan-pin.setujui', $p->id) }}"
+                                                      data-confirm="Setujui pengajuan perubahan PIN {{ $p->nasabah?->nama_siswa ?? '' }}? PIN baru akan langsung berlaku."
+                                                      data-confirm-title="Setujui Pengajuan PIN">
+                                                    @csrf
+                                                    <button class="btn btn-sm btn-success" title="Setujui">
+                                                        <i class="fa-solid fa-check me-1"></i>Setujui
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="small text-danger align-self-center">PIN baru tidak tersimpan</span>
+                                            @endif
                                             <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
                                                     data-bs-target="#modalTolak{{ $p->id }}" title="Tolak">
                                                 <i class="fa-solid fa-xmark me-1"></i>Tolak

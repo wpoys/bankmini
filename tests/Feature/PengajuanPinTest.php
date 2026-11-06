@@ -105,6 +105,23 @@ class PengajuanPinTest extends TestCase
         $this->assertSame(PermintaanResetPin::STATUS_DITOLAK, $p->fresh()->status);
     }
 
+    public function test_pengajuan_tanpa_hash_pin_baru_tidak_dapat_disetujui(): void
+    {
+        $permintaan = PermintaanResetPin::create([
+            'id_nasabah' => $this->nasabah->id,
+            'keterangan' => 'Pengajuan lama tanpa hash PIN baru.',
+            'pin_baru_hash' => null,
+            'status' => PermintaanResetPin::STATUS_PENDING,
+            'diajukan_oleh_role' => 'nasabah',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post(route('permintaan-pin.setujui', $permintaan->id))
+            ->assertSessionHas('error');
+
+        $this->assertSame(PermintaanResetPin::STATUS_PENDING, $permintaan->fresh()->status);
+    }
+
     public function test_alasan_penolakan_wajib_diisi(): void
     {
         $p = $this->buatPengajuan();

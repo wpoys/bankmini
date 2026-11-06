@@ -4,6 +4,7 @@
 @section('page-title', 'Buku Jurnal')
 @section('page-subtitle', 'Pencatatan jurnal keuangan secara rinci')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -33,49 +34,44 @@
             </div>
         </div>
 
-        <div class="data-panel mb-3">
-            <div class="panel-head">
-                <div class="panel-title"><span class="dot"></span>Filter Jurnal</div>
-            </div>
-            <div class="panel-body p-3">
-                @if ($errors->any())
-                    <div class="alert alert-danger py-2 small mb-3">
-                        @foreach ($errors->all() as $pesanError)
-                            <div><i class="fa-solid fa-circle-exclamation me-1"></i>{{ $pesanError }}</div>
+        <div class="list-toolbar list-toolbar-filter">
+            @if ($errors->any())
+                <div class="alert alert-danger py-2 small mb-3">
+                    @foreach ($errors->all() as $pesanError)
+                        <div><i class="fa-solid fa-circle-exclamation me-1"></i>{{ $pesanError }}</div>
+                    @endforeach
+                </div>
+            @endif
+            <form method="GET" class="filter-bar">
+                <div class="filter-field-wide">
+                    <label class="form-label" for="filterMulai">Rentang Tanggal <span class="text-danger">*</span></label>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="filterMulai" name="mulai" value="{{ $mulai->format('Y-m-d') }}" class="form-control form-control-sm" required>
+                        <input type="date" id="filterSampai" name="sampai" value="{{ $sampai->format('Y-m-d') }}" class="form-control form-control-sm" required>
+                    </div>
+                </div>
+                <div class="filter-field">
+                    <label class="form-label" for="filterAkun">Kode Akun</label>
+                    <select name="kode_akun" id="filterAkun" class="form-select form-select-sm">
+                        <option value="">Semua Akun</option>
+                        @foreach ($kodeAkunList as $kode => $nama)
+                            <option value="{{ $kode }}" @selected($kodeAkunTerpilih === $kode)>{{ $kode }} — {{ $nama }}</option>
                         @endforeach
-                    </div>
-                @endif
-                <form method="GET" class="filter-bar">
-                    <div class="filter-field-wide">
-                        <label class="form-label" for="filterMulai">Rentang Tanggal <span class="text-danger">*</span></label>
-                        <div class="d-flex gap-2">
-                            <input type="date" id="filterMulai" name="mulai" value="{{ $mulai->format('Y-m-d') }}" class="form-control form-control-sm" required>
-                            <input type="date" id="filterSampai" name="sampai" value="{{ $sampai->format('Y-m-d') }}" class="form-control form-control-sm" required>
-                        </div>
-                    </div>
-                    <div class="filter-field">
-                        <label class="form-label" for="filterAkun">Kode Akun</label>
-                        <select name="kode_akun" id="filterAkun" class="form-select form-select-sm">
-                            <option value="">Semua Akun</option>
-                            @foreach ($kodeAkunList as $kode => $nama)
-                                <option value="{{ $kode }}" @selected($kodeAkunTerpilih === $kode)>{{ $kode }} — {{ $nama }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="filter-field">
-                        <label class="form-label" for="filterTeller">Teller <span class="text-danger">*</span></label>
-                        <select name="teller" id="filterTeller" class="form-select form-select-sm" required>
-                            <option value="">— Pilih Teller —</option>
-                            @foreach ($tellerList as $t)
-                                <option value="{{ $t->id }}" @selected($tellerTerpilih === $t->id)>{{ $t->nama_petugas }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="filter-action">
-                        <button class="btn btn-sm btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Tampilkan</button>
-                    </div>
-                </form>
-            </div>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label class="form-label" for="filterTeller">Teller <span class="text-danger">*</span></label>
+                    <select name="teller" id="filterTeller" class="form-select form-select-sm" required>
+                        <option value="">— Pilih Teller —</option>
+                        @foreach ($tellerList as $t)
+                            <option value="{{ $t->id }}" @selected($tellerTerpilih === $t->id)>{{ $t->nama_petugas }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="filter-action">
+                    <button class="btn btn-sm btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Tampilkan</button>
+                </div>
+            </form>
         </div>
 
         @if (! $filterLengkap)

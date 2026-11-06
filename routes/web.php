@@ -7,15 +7,14 @@ use App\Http\Controllers\Admin\BackupController as AdminBackupController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\KonfigurasiController as AdminKonfigurasiController;
 use App\Http\Controllers\Admin\NasabahController as AdminNasabahController;
+use App\Http\Controllers\Admin\PenggunaController as AdminPenggunaController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\JadwalPetugasController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PermintaanPinController;
-use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\StrukController;
-use App\Http\Controllers\VerifikasiHarianController;
 use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
 use App\Http\Controllers\Supervisor\LaporanController as SupervisorLaporanController;
 use App\Http\Controllers\Supervisor\VerifikasiController as SupervisorVerifikasiController;
@@ -23,6 +22,7 @@ use App\Http\Controllers\Teller\DashboardController as TellerDashboardController
 use App\Http\Controllers\Teller\KoreksiController as TellerKoreksiController;
 use App\Http\Controllers\Teller\LaporanController as TellerLaporanController;
 use App\Http\Controllers\Teller\TransaksiController as TellerTransaksiController;
+use App\Http\Controllers\VerifikasiHarianController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -57,11 +57,6 @@ Route::middleware(['auth', 'check.active'])->group(function () {
     Route::post('/notifikasi/{notifikasi}/baca', [NotifikasiController::class, 'baca'])->name('notifikasi.baca');
     Route::delete('/notifikasi/{notifikasi}', [NotifikasiController::class, 'hapus'])->name('notifikasi.hapus');
 
-    Route::middleware('role:admin,teller,supervisor')->group(function () {
-        Route::get('/profil', [ProfilController::class, 'show'])->name('profil');
-        Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
-    });
-
     Route::prefix('admin')->middleware('role:admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
@@ -86,6 +81,8 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         Route::post('nasabah/import/konfirmasi', [AdminNasabahController::class, 'importKonfirmasi'])->name('nasabah.import.konfirmasi');
         Route::get('nasabah/import/hasil', [AdminNasabahController::class, 'importHasil'])->name('nasabah.import.hasil');
         Route::get('nasabah/import/template', [AdminNasabahController::class, 'downloadTemplate'])->name('nasabah.import.template');
+        Route::get('nasabah/import/riwayat', [AdminNasabahController::class, 'importHistory'])->name('nasabah.import.history');
+        Route::get('nasabah/import/riwayat/{batch}', [AdminNasabahController::class, 'importHistoryDetail'])->name('nasabah.import.history.show');
 
         Route::post('nasabah/permintaan-reset/{permintaan}/proses', [AdminNasabahController::class, 'prosesPermintaanResetPin'])->name('nasabah.reset-pin.proses');
 
@@ -113,11 +110,15 @@ Route::middleware(['auth', 'check.active'])->group(function () {
 
     Route::prefix('teller')->middleware('role:teller')->name('teller.')->group(function () {
         Route::get('/dashboard', [TellerDashboardController::class, 'index'])->name('dashboard');
+        Route::post('dashboard/cari-nasabah', [TellerDashboardController::class, 'cariNasabah'])->name('dashboard.cari-nasabah');
 
         Route::get('transaksi', [TellerTransaksiController::class, 'index'])->name('transaksi.index');
+        Route::get('transaksi/form/{nasabah}', [TellerTransaksiController::class, 'formNasabah'])->name('transaksi.form');
         Route::get('transaksi/cari', [TellerTransaksiController::class, 'index'])->name('transaksi.cari.get');
         Route::post('transaksi/cari', [TellerTransaksiController::class, 'cariNasabah'])->name('transaksi.cari');
         Route::post('transaksi/proses', [TellerTransaksiController::class, 'proses'])->name('transaksi.proses');
+        Route::get('transaksi/otorisasi/{transaksi}/tunggu', [TellerTransaksiController::class, 'tungguOtorisasi'])->name('transaksi.otorisasi.tunggu');
+        Route::get('transaksi/otorisasi/{transaksi}/status', [TellerTransaksiController::class, 'statusOtorisasi'])->name('transaksi.otorisasi.status');
 
         Route::get('transaksi/struk/{transaksi}', [StrukController::class, 'show'])->name('struk');
         Route::get('transaksi/struk/{transaksi}/cetak', [StrukController::class, 'cetak'])->name('struk.cetak');
@@ -139,9 +140,9 @@ Route::middleware(['auth', 'check.active'])->group(function () {
             Route::post('{jadwal}/batalkan', [JadwalPetugasController::class, 'batalkan'])->name('batalkan');
         });
 
-         Route::get('koreksi', [TellerKoreksiController::class, 'index'])->name('koreksi.index');
-         Route::get('koreksi/transaksi/{nasabah}', [TellerKoreksiController::class, 'transaksiNasabah'])->name('koreksi.transaksi');
-         Route::get('koreksi/create', [TellerKoreksiController::class, 'create'])->name('koreksi.create');
+        Route::get('koreksi', [TellerKoreksiController::class, 'index'])->name('koreksi.index');
+        Route::get('koreksi/transaksi/{nasabah}', [TellerKoreksiController::class, 'transaksiNasabah'])->name('koreksi.transaksi');
+        Route::get('koreksi/create', [TellerKoreksiController::class, 'create'])->name('koreksi.create');
         Route::post('koreksi', [TellerKoreksiController::class, 'store'])->name('koreksi.store');
     });
 
@@ -160,6 +161,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
     // verifikasi koreksi, dan ekspor laporan (sifatnya read-only untuk admin).
     Route::prefix('supervisor')->middleware('role:admin,supervisor')->name('supervisor.')->group(function () {
         Route::get('/dashboard', [SupervisorDashboardController::class, 'index'])->name('dashboard');
+        Route::get('pusat-verifikasi', [SupervisorVerifikasiController::class, 'pusat'])->name('pusat-verifikasi');
 
         Route::get('verifikasi', [SupervisorVerifikasiController::class, 'index'])->name('verifikasi.index');
         Route::get('verifikasi/{laporan}', [SupervisorVerifikasiController::class, 'show'])->name('verifikasi.show');
@@ -171,10 +173,12 @@ Route::middleware(['auth', 'check.active'])->group(function () {
 
         Route::prefix('laporan')->name('laporan.')->group(function () {
             Route::get('/dashboard', [SupervisorLaporanController::class, 'dashboard'])->name('dashboard');
+            Route::get('operasional', [SupervisorLaporanController::class, 'laporanOperasional'])->name('operasional');
             Route::get('laporan-harian', [SupervisorLaporanController::class, 'laporanHarian'])->name('laporan-harian');
             Route::get('buku-besar', [SupervisorLaporanController::class, 'bukuBesar'])->name('buku-besar');
             Route::get('jurnal', [AccountingJurnalController::class, 'index'])->name('jurnal');
             Route::get('mutasi-nasabah', [SupervisorLaporanController::class, 'mutasiNasabah'])->name('mutasi-nasabah');
+            Route::get('saldo-produk', [SupervisorLaporanController::class, 'saldoProduk'])->name('saldo-produk');
             Route::get('laporan-tahunan', [SupervisorLaporanController::class, 'laporanTahunan'])->name('laporan-tahunan');
             Route::get('/panel', [AccountingLaporanController::class, 'panel'])->name('panel');
             Route::get('kartu-simpanan', [AccountingLaporanController::class, 'kartuSimpanan'])->name('kartu-simpanan');
@@ -183,7 +187,6 @@ Route::middleware(['auth', 'check.active'])->group(function () {
         Route::get('jurnal', [AccountingJurnalController::class, 'index'])->name('jurnal');
 
         Route::prefix('koreksi')->name('koreksi.')->group(function () {
-            Route::get('/', [AccountingVerifikasiKoreksiController::class, 'index'])->name('index');
             Route::post('{koreksi}/approve', [AccountingVerifikasiKoreksiController::class, 'approve'])->name('approve');
             Route::post('{koreksi}/tolak', [AccountingVerifikasiKoreksiController::class, 'tolak'])->name('tolak');
         });
@@ -196,6 +199,6 @@ Route::middleware(['auth', 'check.active'])->group(function () {
     });
 });
 
-Route::prefix('admin')->middleware('role:admin')->name('admin.')->group(function () {
-    Route::get('pengguna', [\App\Http\Controllers\Admin\PenggunaController::class, 'index'])->name('pengguna.index');
+Route::prefix('admin')->middleware(['auth', 'check.active', 'role:admin'])->name('admin.')->group(function () {
+    Route::get('pengguna', [AdminPenggunaController::class, 'index'])->name('pengguna.index');
 });

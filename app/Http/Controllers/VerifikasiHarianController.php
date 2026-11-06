@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaksi;
+use App\Models\VerifikasiHarian;
 use App\Support\VerifikasiHarianProses;
 use App\Support\VerifikasiHarianService;
 use Illuminate\Http\RedirectResponse;
@@ -13,9 +15,9 @@ use Illuminate\View\View;
  * Verifikasi transaksi supervisor PER HARI.
  *
  * Transaksi dikelompokkan berdasarkan tanggal. Supervisor memilih tanggal,
- * melihat transaksi yang belum diverifikasi beserta ringkasan harian, lalu
- * memverifikasi satu kali. Tanggal yang sudah diverifikasi tidak dapat
- * diverifikasi ulang, namun riwayat tetap dapat dilihat.
+ * melihat transaksi beserta ringkasan harian, lalu menerima atau menolak
+ * verifikasi. Tanggal yang ditolak dapat ditinjau ulang; tanggal yang diterima
+ * menjadi riwayat tetap.
  */
 class VerifikasiHarianController extends Controller
 {
@@ -26,6 +28,14 @@ class VerifikasiHarianController extends Controller
             : null;
 
         $daftar = VerifikasiHarianService::daftarTanggal(30);
+        if ($tanggal && ! $daftar->contains(fn ($row) => $row['tanggal'] === $tanggal->toDateString())) {
+            $daftar->prepend([
+                'tanggal' => $tanggal->toDateString(),
+                'ringkasan' => VerifikasiHarianService::ringkasan($tanggal),
+                'sudah' => VerifikasiHarian::whereDate('tanggal', $tanggal)->first(),
+            ]);
+        }
+        $hubContext = $this->hubContext($request);
 
         $terpilih = null;
         $ringkasan = null;
@@ -34,15 +44,13 @@ class VerifikasiHarianController extends Controller
         $hanyaBelum = $request->boolean('belum');
 
         if ($tanggal) {
-            $verifikasi = \App\Models\VerifikasiHarian::whereDate('tanggal', $tanggal)->first();
+            $verifikasi = VerifikasiHarian::whereDate('tanggal', $tanggal)->first();
             $ringkasan = VerifikasiHarianService::ringkasan($tanggal);
             $terpilih = $tanggal;
 
-            // Sebelum terverifikasi: daftar transaksi yang belum diverifikasi.
-            // Setelah terverifikasi: seluruh transaksi hari itu ditampilkan
-            // sebagai riwayat read-only (tidak dapat diverifikasi ulang).
+            // Tampilkan seluruh transaksi tanggal terpilih untuk ditinjau ulang atau dibaca sebagai riwayat.
             $transaksi = VerifikasiHarianService::transaksiTanggal($tanggal)
-                ->reject(fn ($t) => $t->status === \App\Models\Transaksi::STATUS_DITOLAK)
+                ->filter(fn ($t) => $t->status === Transaksi::STATUS_APPROVED)
                 ->values();
         }
 
@@ -53,26 +61,56 @@ class VerifikasiHarianController extends Controller
             'transaksi',
             'verifikasi',
             'hanyaBelum',
+            'hubContext',
         ));
     }
 
-    /**
-     * Verifikasi satu tanggal. Idempoten: tidak dapat diulang.
-     */
     public function verifikasi(Request $request, string $tanggal): RedirectResponse
     {
+        $keputusan = $request->input('keputusan', VerifikasiHarian::STATUS_DITERIMA);
         $request->validate([
-            'catatan' => ['nullable', 'string', 'max:500'],
+            'keputusan' => ['nullable', 'in:diterima,ditolak'],
+            'catatan' => ['nullable', 'string', 'max:500', 'required_if:keputusan,ditolak'],
+        ], [
+            'catatan.required_if' => 'Catatan wajib diisi saat menolak verifikasi.',
         ]);
 
         try {
-            $hasil = VerifikasiHarianProses::verifikasi($tanggal, $request->user(), $request->input('catatan'));
+            $hasil = VerifikasiHarianProses::verifikasi(
+                $tanggal,
+                $request->user(),
+                $request->input('catatan'),
+                $keputusan,
+            );
         } catch (\Throwable $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        $pesan = $hasil->status === VerifikasiHarian::STATUS_DITOLAK
+            ? 'Verifikasi tanggal '.$hasil->tanggal->format('d/m/Y').' ditolak. Teller terkait telah menerima notifikasi.'
+            : 'Transaksi tanggal '.$hasil->tanggal->format('d/m/Y').' berhasil diterima. Verifikasi ulang tidak diizinkan.';
+
+        if ($hubContext = $this->hubContext($request)) {
+            return redirect()
+                ->route('supervisor.pusat-verifikasi', $hubContext)
+                ->with('success', $pesan);
         }
 
         return redirect()
             ->route('verifikasi.index', ['tanggal' => $hasil->tanggal->toDateString()])
-            ->with('success', 'Transaksi tanggal '.$hasil->tanggal->format('d/m/Y').' berhasil diverifikasi. Verifikasi ulang tidak diizinkan.');
+            ->with('success', $pesan);
+    }
+
+    private function hubContext(Request $request): ?array
+    {
+        if (! $request->boolean('hub')) {
+            return null;
+        }
+
+        return [
+            'tab' => 'transaksi-harian',
+            'status' => (string) $request->input('status', 'belum'),
+            'cari' => (string) $request->input('cari', ''),
+        ];
     }
 }

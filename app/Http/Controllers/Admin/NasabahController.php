@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Nasabah;
+use App\Models\NasabahImportBatch;
+use App\Models\NasabahImportBatchRow;
 use App\Models\PermintaanResetPin;
 use App\Models\User;
 use App\Support\PendaftaranNasabah;
@@ -22,13 +24,13 @@ class NasabahController extends Controller
     {
         $nasabah = Nasabah::query()
             ->with('user')
-            ->when($request->search, fn($q) => $q
+            ->when($request->search, fn ($q) => $q
                 ->where('nama_siswa', 'like', "%{$request->search}%")
                 ->orWhere('no_rekening', 'like', "%{$request->search}%")
                 ->orWhere('nis', 'like', "%{$request->search}%"))
-            ->when($request->kelas, fn($q) => $q->where('kelas', $request->kelas))
-            ->when($request->arsip === 'aktif', fn($q) => $q->where('arsip', false))
-            ->when($request->arsip === 'arsip', fn($q) => $q->where('arsip', true))
+            ->when($request->kelas, fn ($q) => $q->where('kelas', $request->kelas))
+            ->when($request->arsip === 'aktif', fn ($q) => $q->where('arsip', false))
+            ->when($request->arsip === 'arsip', fn ($q) => $q->where('arsip', true))
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -52,7 +54,7 @@ class NasabahController extends Controller
                 ->with('success', "Nasabah {$result->nama_siswa} berhasil dibuat dengan no. rekening {$result->no_rekening}.");
         } catch (\Throwable $e) {
             return back()->withInput()
-                ->with('error', 'Gagal membuat nasabah: ' . $e->getMessage());
+                ->with('error', 'Gagal membuat nasabah: '.$e->getMessage());
         }
     }
 
@@ -72,13 +74,13 @@ class NasabahController extends Controller
                 ->with('success', 'Nasabah berhasil diperbarui.');
         } catch (\Throwable $e) {
             return back()->withInput()
-                ->with('error', 'Gagal memperbarui nasabah: ' . $e->getMessage());
+                ->with('error', 'Gagal memperbarui nasabah: '.$e->getMessage());
         }
     }
 
     public function destroy(Nasabah $nasabah): RedirectResponse
     {
-        if (!$nasabah->isArsip()) {
+        if (! $nasabah->isArsip()) {
             return back()->with('error', 'Nasabah aktif tidak dapat dihapus. Arsipkan nasabah terlebih dahulu.');
         }
 
@@ -107,7 +109,7 @@ class NasabahController extends Controller
             return redirect()->route('admin.nasabah.index')
                 ->with('success', "Nasabah {$nama}, akun user, saldo, dan seluruh data terkait berhasil dihapus permanen.");
         } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal menghapus nasabah permanen: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus nasabah permanen: '.$e->getMessage());
         }
     }
 
@@ -131,7 +133,7 @@ class NasabahController extends Controller
 
     public function restore(Nasabah $nasabah): RedirectResponse
     {
-        if (!$nasabah->isArsip()) {
+        if (! $nasabah->isArsip()) {
             return back()->with('error', 'Nasabah ini tidak dalam status arsip.');
         }
 
@@ -150,9 +152,21 @@ class NasabahController extends Controller
     /**
      * Tampilkan formulir unggah data nasabah massal.
      */
-    public function importForm(): View
+    public function importForm(): RedirectResponse
     {
-        return view('admin.nasabah.import');
+        return redirect()->route('admin.pengguna.index', ['tab' => 'import']);
+    }
+
+    public function importHistory(): RedirectResponse
+    {
+        return redirect()->route('admin.pengguna.index', ['tab' => 'history']);
+    }
+
+    public function importHistoryDetail(NasabahImportBatch $batch): View
+    {
+        return view('admin.nasabah.import-batch', [
+            'batch' => $batch->load(['importer', 'rows' => fn ($query) => $query->orderBy('row_number')]),
+        ]);
     }
 
     /**
@@ -166,7 +180,7 @@ class NasabahController extends Controller
         $template .= "20261003,Ibu Ratna Sari,AKL 1,guru,ratna.sari@contoh.test,100000\n";
 
         return response()->streamDownload(function () use ($template) {
-            echo "\xEF\xBB\xBF" . $template;
+            echo "\xEF\xBB\xBF".$template;
         }, 'template-import-nasabah.csv', ['Content-Type' => 'text/csv']);
     }
 
@@ -179,6 +193,7 @@ class NasabahController extends Controller
             'file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
         ]);
 
+        $fileName = $request->file('file')->getClientOriginalName();
         $path = $request->file('file')->store('import', 'local');
         $content = Storage::disk('local')->get($path);
         Storage::disk('local')->delete($path);
@@ -193,13 +208,14 @@ class NasabahController extends Controller
             return back()->with('error', 'File CSV kosong atau format tidak sesuai.');
         }
 
-        $header = array_map(fn($h) => strtolower(trim($h)), $baris[0]);
+        $header = array_map(fn ($h) => strtolower(trim($h)), $baris[0]);
 
         if ($this->punyaKolomTerlarang($header)) {
             return back()->with('error', 'Kolom no_hp tidak didukung. Gunakan kolom email untuk kontak nasabah.');
         }
 
         $indeks = $this->petakanKolom($header);
+        $pinColumn = $indeks['pin'] !== null;
 
         if ($indeks['nis'] === null || $indeks['nama'] === null || $indeks['kelas'] === null) {
             return back()->with('error', 'Kolom wajib (nis, nama, kelas) tidak ditemukan pada baris header.');
@@ -219,6 +235,7 @@ class NasabahController extends Controller
                 'kelas' => $this->nilaiKolom($kolom, $indeks, 'kelas'),
                 'produk' => strtolower($this->nilaiKolom($kolom, $indeks, 'produk')),
                 'email' => strtolower($this->nilaiKolom($kolom, $indeks, 'email')),
+                'pin' => $this->nilaiKolom($kolom, $indeks, 'pin'),
                 'saldo_awal' => $this->nilaiKolom($kolom, $indeks, 'saldo_awal'),
             ];
 
@@ -226,6 +243,9 @@ class NasabahController extends Controller
             $data['saldo_awal'] = $data['saldo_awal'] === '' ? '0' : $data['saldo_awal'];
 
             $data['errors'] = $this->validasiBaris($data, $nisDalamFile, $emailDalamFile);
+            if ($pinColumn && $data['pin'] !== '' && ! preg_match('/^\d{6}$/', $data['pin'])) {
+                $data['errors'][] = 'PIN harus terdiri dari 6 digit angka.';
+            }
             $data['valid'] = empty($data['errors']);
             $data['saldo_awal'] = is_numeric($data['saldo_awal']) ? (int) $data['saldo_awal'] : 0;
 
@@ -244,7 +264,17 @@ class NasabahController extends Controller
             return back()->with('error', 'Tidak ada baris data yang ditemukan setelah header.');
         }
 
+        $batch = NasabahImportBatch::create([
+            'imported_by' => auth()->id(),
+            'file_name' => basename($fileName),
+            'total_rows' => $rows->count(),
+            'valid_rows' => $rows->where('valid', true)->count(),
+            'invalid_rows' => $rows->where('valid', false)->count(),
+            'status' => 'previewed',
+        ]);
+
         session()->put('import_preview', $rows->all());
+        session()->put('import_batch_id', $batch->id);
 
         return view('admin.nasabah.import-preview', [
             'rows' => $rows,
@@ -260,18 +290,28 @@ class NasabahController extends Controller
     {
         $preview = session('import_preview');
 
-        if (!$preview) {
+        if (! $preview) {
             return redirect()->route('admin.nasabah.import')->with('error', 'Tidak ada data pratinjau. Silakan unggah file terlebih dahulu.');
         }
 
         $berhasil = 0;
         $gagal = 0;
         $kesalahan = [];
+        $batch = NasabahImportBatch::find(session('import_batch_id'));
+
+        if (! $batch) {
+            return redirect()->route('admin.nasabah.import')->with('error', 'Data riwayat pratinjau tidak ditemukan. Silakan unggah ulang file.');
+        }
+
+        $batchRows = [];
 
         foreach ($preview as $data) {
-            if (!$data['valid']) {
+            if (! $data['valid']) {
                 $gagal++;
-                $kesalahan[] = 'Baris ' . $data['row'] . ': ' . implode(' ', $data['errors']);
+                $message = implode(' ', $data['errors']);
+                $kesalahan[] = 'Baris '.$data['row'].': '.$message;
+                $batchRows[] = ['row_number' => $data['row'], 'status' => 'failed', 'errors' => $data['errors']];
+                unset($data['pin']);
 
                 continue;
             }
@@ -287,15 +327,32 @@ class NasabahController extends Controller
                 ]);
 
                 $berhasil++;
+                $batchRows[] = ['row_number' => $data['row'], 'status' => 'imported', 'errors' => null];
             } catch (\Throwable $e) {
                 $gagal++;
-                $kesalahan[] = 'Baris ' . $data['row'] . ': Gagal menyimpan (' . $e->getMessage() . ').';
+                $message = 'Gagal menyimpan data.';
+                $kesalahan[] = 'Baris '.$data['row'].': '.$message;
+                $batchRows[] = ['row_number' => $data['row'], 'status' => 'failed', 'errors' => [$message]];
             }
+            unset($data['pin']);
         }
 
-        ActivityLog::catat(auth()->id(), 'import_nasabah', "Import data nasabah: {$berhasil} berhasil, {$gagal} gagal.");
+        DB::transaction(function () use ($batch, $batchRows, $berhasil, $gagal) {
+            foreach ($batchRows as $row) {
+                NasabahImportBatchRow::create(array_merge($row, ['batch_id' => $batch->id]));
+            }
 
-        session()->forget('import_preview');
+            $batch->update([
+                'imported_rows' => $berhasil,
+                'failed_rows' => $gagal,
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
+        });
+
+        ActivityLog::catat(auth()->id(), 'import_nasabah', "Import batch #{$batch->id}: {$berhasil} berhasil, {$gagal} gagal.");
+
+        session()->forget(['import_preview', 'import_batch_id']);
         session()->put('import_hasil', [
             'berhasil' => $berhasil,
             'gagal' => $gagal,
@@ -312,7 +369,7 @@ class NasabahController extends Controller
     {
         $hasil = session('import_hasil');
 
-        if (!$hasil) {
+        if (! $hasil) {
             return redirect()->route('admin.nasabah.import');
         }
 
@@ -329,7 +386,7 @@ class NasabahController extends Controller
             return $errors;
         }
 
-        if (!in_array($data['kelas'], Nasabah::KELAS, true)) {
+        if (! in_array($data['kelas'], Nasabah::KELAS, true)) {
             $errors[] = 'Kelas tidak tersedia pada daftar kelas yang diperbolehkan.';
         }
 
@@ -341,12 +398,12 @@ class NasabahController extends Controller
             $errors[] = "NIS {$data['nis']} duplikat di dalam file.";
         }
 
-        if (!in_array($data['produk'], [Nasabah::PRODUK_SISWA, Nasabah::PRODUK_GURU], true)) {
+        if (! in_array($data['produk'], [Nasabah::PRODUK_SISWA, Nasabah::PRODUK_GURU], true)) {
             $errors[] = 'Produk harus siswa atau guru.';
         }
 
         if ($data['email'] !== '') {
-            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            if (! filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
                 $errors[] = 'Format email tidak valid.';
             } elseif (User::where('email', $data['email'])->exists()) {
                 $errors[] = "Email {$data['email']} sudah digunakan.";
@@ -357,7 +414,7 @@ class NasabahController extends Controller
             $errors[] = 'Email wajib diisi untuk aktivasi akun nasabah.';
         }
 
-        if (!is_numeric($data['saldo_awal']) || (int) $data['saldo_awal'] < 0) {
+        if (! is_numeric($data['saldo_awal']) || (int) $data['saldo_awal'] < 0) {
             $errors[] = 'Saldo awal harus berupa angka minimal 0.';
         }
 

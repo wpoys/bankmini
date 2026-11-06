@@ -24,6 +24,7 @@ class PermintaanPinController extends Controller
         $status = $request->query('status');
 
         $permintaan = PermintaanResetPin::with(['nasabah.user', 'pemroses'])
+            ->when($request->integer('id') > 0, fn ($q) => $q->whereKey($request->integer('id')))
             ->when($status && $status !== 'all', fn ($q) => $q->where('status', $status))
             ->orderByRaw('CASE WHEN status = "pending" THEN 0 ELSE 1 END')
             ->latest()

@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\ActivityLog;
 use App\Models\Transaksi;
 use App\Models\User;
+use App\Models\UserNotification;
 use App\Models\VerifikasiHarian;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -20,24 +21,29 @@ use Illuminate\Support\Facades\DB;
  */
 class VerifikasiHarianProses
 {
-    /**
-     * Verifikasi satu tanggal. Idempoten: tanggal yang sudah diverifikasi
-     * tidak dapat diverifikasi ulang.
-     */
-    public static function verifikasi(string $tanggal, User $aktor, ?string $catatan = null): VerifikasiHarian
-    {
+    public static function verifikasi(
+        string $tanggal,
+        User $aktor,
+        ?string $catatan = null,
+        string $keputusan = VerifikasiHarian::STATUS_DITERIMA,
+    ): VerifikasiHarian {
         $hari = Carbon::parse($tanggal)->startOfDay();
 
-        return DB::transaction(function () use ($hari, $aktor, $catatan) {
-            // Kunci baris hari tersebut agar tidak ada dua proses bersamaan.
-            $locks = VerifikasiHarian::whereDate('tanggal', $hari)
+        if (! in_array($keputusan, [VerifikasiHarian::STATUS_DITERIMA, VerifikasiHarian::STATUS_DITOLAK], true)) {
+            throw new \RuntimeException('Keputusan verifikasi tidak valid.');
+        }
+
+        if ($keputusan === VerifikasiHarian::STATUS_DITOLAK && blank($catatan)) {
+            throw new \RuntimeException('Catatan wajib diisi saat menolak verifikasi.');
+        }
+
+        return DB::transaction(function () use ($hari, $aktor, $catatan, $keputusan) {
+            $sudah = VerifikasiHarian::whereDate('tanggal', $hari)
                 ->lockForUpdate()
-                ->get();
+                ->first();
 
-            $sudah = $locks->first();
-
-            if ($sudah && $sudah->verifikasi_at !== null) {
-                throw new \RuntimeException('Verifikasi tanggal '.$hari->format('d/m/Y').' sudah selesai dan tidak dapat diulang.');
+            if ($sudah?->sudah_diverifikasi) {
+                throw new \RuntimeException('Verifikasi tanggal '.$hari->format('d/m/Y').' sudah diterima dan tidak dapat diulang.');
             }
 
             $ringkasan = VerifikasiHarianService::ringkasan($hari);
@@ -53,6 +59,8 @@ class VerifikasiHarianProses
                 'total_penarikan' => $ringkasan['total_penarikan'],
                 'total_kas' => $ringkasan['total_kas'],
                 'selisih' => $ringkasan['selisih'],
+                'status' => $keputusan,
+                'catatan' => $keputusan === VerifikasiHarian::STATUS_DITOLAK ? trim((string) $catatan) : $sudah?->catatan,
                 'transaksi_tercatat' => $ringkasan['jumlah'],
                 'verifikasi_oleh' => $aktor->id,
                 'verifikasi_at' => now(),
@@ -65,11 +73,28 @@ class VerifikasiHarianProses
                 $verifikasi = VerifikasiHarian::create($payload);
             }
 
-            if ($catatan) {
-                ActivityLog::catat(
-                    $aktor->id,
-                    'verifikasi_harian',
-                    'Verifikasi transaksi tanggal '.$hari->format('d/m/Y').' ('.$ringkasan['jumlah'].' transaksi) oleh '.$aktor->nama_petugas.'.'
+            $ditolak = $keputusan === VerifikasiHarian::STATUS_DITOLAK;
+            ActivityLog::catat(
+                $aktor->id,
+                'verifikasi_harian',
+                ($ditolak ? 'Menolak' : 'Menerima').' verifikasi transaksi tanggal '.$hari->format('d/m/Y').' ('.$ringkasan['jumlah'].' transaksi) oleh '.$aktor->nama_petugas.'.'.($ditolak ? ' Catatan: '.trim((string) $catatan) : '')
+            );
+
+            $tellerIds = Transaksi::whereDate('tanggal', $hari)
+                ->where('status', Transaksi::STATUS_APPROVED)
+                ->whereNotNull('id_user')
+                ->distinct()
+                ->pluck('id_user');
+
+            foreach ($tellerIds as $tellerId) {
+                UserNotification::kirim(
+                    (int) $tellerId,
+                    $ditolak ? UserNotification::TIPE_DANGER : UserNotification::TIPE_SUCCESS,
+                    $ditolak ? 'Verifikasi transaksi ditolak' : 'Verifikasi transaksi diterima',
+                    $ditolak
+                        ? 'Transaksi tanggal '.$hari->format('d/m/Y').' ditolak. Catatan supervisor: '.trim((string) $catatan)
+                        : 'Transaksi tanggal '.$hari->format('d/m/Y').' telah diterima supervisor.',
+                    route('teller.koreksi.index'),
                 );
             }
 
@@ -86,12 +111,11 @@ class VerifikasiHarianProses
 
         $query = Transaksi::with(['nasabah', 'user'])
             ->whereDate('tanggal', $tanggal)
-            ->where('status', '!=', Transaksi::STATUS_DITOLAK)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->orderBy('created_at')
             ->orderBy('id');
 
-        if ($verifikasi && $verifikasi->verifikasi_at) {
-            // Sudah diverifikasi: tidak ada transaksi "belum diverifikasi".
+        if ($verifikasi?->sudah_diverifikasi) {
             $query->whereRaw('1 = 0');
         }
 

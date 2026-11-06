@@ -150,7 +150,7 @@
                                         <div class="bs-value" id="teksSaldoSebelum"></div>
                                     </div>
                                     <div class="bs-box">
-                                        <div class="bs-label">Estimasi Saldo Setelah</div>
+                                        <div class="bs-label">Estimasi Saldo Setelah Persetujuan</div>
                                         <div class="bs-value" id="teksSaldoSesudah"></div>
                                     </div>
                                 </div>
@@ -175,16 +175,7 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label" for="pinKeamanan">PIN Keamanan Nasabah</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
-                                        <input type="password" name="pin_keamanan" id="pinKeamanan" maxlength="6"
-                                               class="form-control" placeholder="PIN 6 digit" required
-                                               inputmode="numeric" pattern="[0-9]{6}" autocomplete="off">
-                                    </div>
-                                    <div class="form-text">PIN dikirim/disampaikan nasabah. Pastikan sesuai sebelum proses.</div>
-                                </div>
+                                <div class="alert alert-info py-2 small"><i class="fa-solid fa-mobile-screen-button me-1"></i>Nasabah akan menerima permintaan konfirmasi di aplikasi dan memasukkan PIN sendiri. Permintaan berlaku 5 menit.</div>
 
                                 <div class="d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-outline-secondary flex-fill" id="btnResetTransaksi">
@@ -197,7 +188,7 @@
                                         <i class="fa-solid fa-floppy-disk me-1"></i>Simpan Draft
                                     </button> -->
                                     <button type="submit" class="btn btn-primary flex-fill btn-submit-loading">
-                                        <i class="fa-solid fa-circle-check me-1"></i>Proses Transaksi
+                                        <i class="fa-solid fa-paper-plane me-1"></i>Kirim Permintaan
                                     </button>
                                 </div>
                             </form>
@@ -284,43 +275,53 @@
         </div>
     </div>
 
-    {{-- Modal Verifikasi PIN + konfirmasi transaksi --}}
-    <div class="modal fade" id="modalPin" tabindex="-1" aria-labelledby="modalPinLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <form id="formVerifikasiPin">
-                    <div class="modal-header">
-                        <h6 class="modal-title" id="modalPinLabel"><i class="fa-solid fa-shield-halved me-2 text-primary"></i>Konfirmasi Transaksi</h6>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+    <div class="modal fade scan-result-modal" id="modalHasilScan" tabindex="-1" aria-labelledby="modalHasilScanLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content scan-result-content">
+                <div class="scan-result-card">
+                    <div class="scan-result-topline">
+                        <span class="scan-result-brand"><i class="fa-solid fa-building-columns"></i> BANK MINI PASAR KELAS</span>
+                        <span class="scan-result-active"><i class="fa-solid fa-circle"></i> Nasabah Aktif</span>
                     </div>
-                    <div class="modal-body">
-                        <p class="small text-muted mb-3">Transaksi akan diproses setelah PIN nasabah dikonfirmasi. Pastikan data sudah benar.</p>
-                        <div class="customer-card mb-3" style="padding:.6rem .8rem;">
-                            <div class="cus-avatar" style="width:36px;height:36px;font-size:.8rem;">
-                                {{ mb_strtoupper(mb_substr($nasabah?->nama_siswa ?? 'N', 0, 1)) }}
-                            </div>
-                            <div>
-                                <div class="fw-semibold small">{{ $nasabah->nama_siswa ?? '-' }}</div>
-                                <div class="text-muted" style="font-size:.7rem;">
-                                    <span id="pinJenisLabel">Setoran</span> · <span id="pinNominalLabel">Rp 0</span> ·
-                                    <span id="pinSaldoLabel"></span>
-                                </div>
-                            </div>
+                    <div class="scan-result-customer">
+                        <div class="scan-result-avatar" id="hasilScanAvatar">N</div>
+                        <div class="scan-result-details">
+                            <div class="scan-result-name" id="hasilScanNama"></div>
+                            <div class="scan-result-meta">Nomor Rekening</div>
+                            <div class="scan-result-value" id="hasilScanRekening"></div>
                         </div>
-                        <label class="form-label" for="pinVerifikasi">PIN Keamanan (6 digit)</label>
-                        <input type="password" class="form-control text-center" id="pinVerifikasi" maxlength="6"
-                               placeholder="• • • • • •" inputmode="numeric" pattern="[0-9]{6}" autocomplete="off">
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-primary btn-sm" id="btnPinLanjut" disabled>
-                            <i class="fa-solid fa-check me-1"></i>Konfirmasi & Proses
-                        </button>
-                    </div>
-                </form>
+                    <div class="scan-result-check"><i class="fa-solid fa-check"></i> Terverifikasi di database nasabah</div>
+                </div>
+                <div class="scan-result-actions">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnHasilScanBatal"><i class="fa-solid fa-rotate-left me-1"></i>Batal / Scan Ulang</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnHasilScanLanjut">Lanjut ke Form Transaksi <i class="fa-solid fa-arrow-right ms-1"></i></button>
+                </div>
             </div>
         </div>
     </div>
+
+    <style>
+        .scan-result-modal { background: rgba(12, 22, 43, .58); backdrop-filter: blur(5px); }
+        .scan-result-modal.show { display: flex !important; align-items: center; }
+        .scan-result-modal .modal-dialog { width: min(420px, calc(100% - 28px)); max-width: 420px; }
+        .scan-result-content { padding: 14px; border: 1px solid rgba(255,255,255,.75); border-radius: 16px; background: #f8fafc; box-shadow: 0 18px 55px rgba(0,0,0,.28); }
+        .scan-result-card { padding: 13px; color: #fff; border-radius: 11px; background: linear-gradient(135deg,#10264f,#173b79); box-shadow: 0 4px 12px rgba(9,27,61,.25); }
+        .scan-result-topline,.scan-result-customer,.scan-result-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+        .scan-result-brand { font-size:.65rem; font-weight:700; letter-spacing:.02em; }
+        .scan-result-brand i { color:#73a4ff; margin-right:4px; }
+        .scan-result-active { padding:4px 8px; border-radius:20px; color:#72f0bf; background:rgba(12,180,125,.18); font-size:.62rem; white-space:nowrap; }
+        .scan-result-active i { font-size:.4rem; margin-right:3px; }
+        .scan-result-customer { justify-content:flex-start; margin-top:16px; }
+        .scan-result-avatar { display:grid; place-items:center; flex:none; width:42px; height:42px; border-radius:10px; color:#10264f; background:linear-gradient(145deg,#a8ceff,#5794f5); font-size:.95rem; font-weight:800; }
+        .scan-result-name { font-size:.9rem; font-weight:700; }
+        .scan-result-meta { margin-top:3px; color:#b9c8e3; font-size:.65rem; }
+        .scan-result-value { font-size:.65rem; font-weight:600; }
+        .scan-result-check { margin-top:15px; color:#6fe8b4; font-size:.65rem; }
+        .scan-result-actions { padding:13px 0 0; }
+        @media(max-width:420px) { .scan-result-actions { align-items:stretch; flex-direction:column; } }
+    </style>
+
     {{-- Modal Cetak Struk --}}
     <div class="modal fade" id="modalCetakStruk" tabindex="-1" aria-labelledby="modalCetakStrukLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -363,6 +364,7 @@
         let isStarting = false;
         let stopRequested = false;
         let scanInProgress = false;
+        let scannedCustomerCode = '';
 
         const modalScanQrEl = document.getElementById('modalScanQr');
         if (modalScanQrEl) {
@@ -425,27 +427,48 @@
                     await scanner.start(cameras[0].id, config, onScanSuccess, () => { });
                 }
 
-                isScanning = true;
                 const video = reader.querySelector('video');
                 if (!video) throw new Error('Preview kamera tidak tersedia.');
                 video.setAttribute('autoplay', 'true');
                 video.setAttribute('playsinline', 'true');
                 video.muted = true;
-                video.style.display = 'block';
-                video.style.width = '100%';
-                video.style.height = 'auto';
                 await video.play();
+                if (!video.videoWidth || !video.videoHeight) {
+                    await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => reject(new Error('Kamera terbuka tetapi tidak mengirim gambar. Periksa kamera yang dipilih.')), 3000);
+                        video.addEventListener('loadeddata', () => {
+                            clearTimeout(timeout);
+                            resolve();
+                        }, { once: true });
+                    });
+                }
+                isScanning = true;
                 setScanStatus('<span class="text-success"><i class="fa-solid fa-camera"></i> Kamera aktif. Tunjukkan QR Code nasabah.</span>');
 
                 if (stopRequested || !modalScanQrEl.classList.contains('show')) {
                     await stopScanner();
                 }
             } catch (error) {
+                isScanning = false;
                 if (!stopRequested) {
-                    setScanStatus('<span class="text-danger"><i class="fa-solid fa-circle-xmark"></i> Kamera tidak dapat diakses.</span>');
+                    const message = error && error.message ? error.message : 'Kamera tidak dapat diakses.';
+                    const safeMessage = message.replace(/[&<>"']/g, (character) => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;',
+                    })[character]);
+                    setScanStatus('<span class="text-danger"><i class="fa-solid fa-circle-xmark"></i> ' + safeMessage + '</span>');
+                    const retryButton = document.getElementById('btnScanUlang');
+                    if (retryButton) retryButton.classList.remove('d-none');
                 }
                 if (qrScanner === scanner) {
                     qrScanner = null;
+                }
+                try {
+                    await scanner.stop();
+                } catch (stopError) {
                 }
                 try {
                     await scanner.clear();
@@ -472,6 +495,16 @@
             } catch (error) {
             }
         }
+
+        document.getElementById('btnHasilScanBatal').addEventListener('click', function () {
+            bootstrap.Modal.getInstance(document.getElementById('modalHasilScan')).hide();
+            bootstrap.Modal.getOrCreateInstance(modalScanQrEl).show();
+        });
+
+        document.getElementById('btnHasilScanLanjut').addEventListener('click', function () {
+            document.getElementById('inputCari').value = scannedCustomerCode;
+            document.getElementById('formCari').submit();
+        });
 
         function onScanSuccess(decodedText) {
             if (scanInProgress) return;
@@ -503,13 +536,18 @@
                     if (!ok || !data || !data.success) {
                         throw new Error((data && data.message) ? data.message : 'Nasabah tidak ditemukan. Silakan coba lagi.');
                     }
-                    setScanStatus('<span class="text-success fw-semibold"><i class="fa-solid fa-circle-check"></i> ' + data.message + '</span>');
-                    setTimeout(() => {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalScanQr'));
-                        if (modal) modal.hide();
-                        document.getElementById('inputCari').value = code;
-                        document.getElementById('formCari').submit();
-                    }, 800);
+                    scannedCustomerCode = code;
+                    const customer = data.nasabah;
+                    document.getElementById('hasilScanNama').textContent = customer.nama_siswa;
+                    document.getElementById('hasilScanRekening').textContent = customer.no_rekening;
+                    document.getElementById('hasilScanAvatar').textContent = customer.nama_siswa.trim().split(/\\s+/).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('');
+                    const scanModal = bootstrap.Modal.getInstance(modalScanQrEl);
+                    scanModal.hide();
+                    modalScanQrEl.addEventListener('hidden.bs.modal', function showCustomerResult() {
+                        modalScanQrEl.removeEventListener('hidden.bs.modal', showCustomerResult);
+                        bootstrap.Modal.getOrCreateInstance(document.getElementById('modalHasilScan')).show();
+                    }, { once: true });
+                    scanInProgress = false;
                 })
                 .catch((err) => {
                     scanInProgress = false;
@@ -542,34 +580,6 @@
                 document.getElementById('nominal').dispatchEvent(new Event('input', { bubbles: true }));
                 nominal.focus();
             });
-
-            const modalPinEl = document.getElementById('modalPin');
-            if (modalPinEl) {
-                modalPinEl.addEventListener('show.bs.modal', function () {
-                    const jenis = (document.getElementById('jenisTrans').value === 'setoran') ? 'Setoran' : 'Penarikan';
-                    const n = parseInt(nominal.value || '0', 10) || 0;
-                    document.getElementById('pinJenisLabel').textContent = jenis;
-                    document.getElementById('pinNominalLabel').textContent = fmt(n);
-                    document.getElementById('btnPinLanjut').disabled = true;
-                    document.getElementById('pinVerifikasi').value = '';
-                });
-
-                document.getElementById('btnPinLanjut').addEventListener('click', function () {
-                    const pin = document.getElementById('pinVerifikasi').value.trim();
-                    if (!/^\d{6}$/.test(pin)) {
-                        showToast('PIN harus 6 digit angka.', 'warning');
-                        return;
-                    }
-                    document.getElementById('pinKeamanan').value = pin;
-                    bootstrap.Modal.getInstance(modalPinEl).hide();
-                    showToast('PIN terverifikasi. Klik Proses Transaksi untuk melanjutkan.', 'success');
-                });
-
-                document.getElementById('pinVerifikasi').addEventListener('input', function (e) {
-                    this.value = this.value.replace(/\D/g, '');
-                    document.getElementById('btnPinLanjut').disabled = !/^\d{6}$/.test(this.value);
-                });
-            }
 
             form.addEventListener('submit', function (e) {
                 const jenis = document.getElementById('jenisTrans').value;

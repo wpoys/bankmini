@@ -185,7 +185,7 @@ it('koreksi transaksi membuat transaksi pembalik saat disetujui', function () {
 
     $this->actingAs($supervisor)
         ->post("/supervisor/koreksi/{$koreksi->id}/approve")
-        ->assertRedirect(route('supervisor.koreksi.index'));
+        ->assertRedirect(route('supervisor.pusat-verifikasi', ['tab' => 'koreksi', 'status' => 'menunggu_approval']));
 
     $koreksi->refresh();
     expect($koreksi->status)->toBe('disetujui');
@@ -389,7 +389,7 @@ it('menolak koreksi dengan alasan wajib saat penolakan', function () {
 
     $this->actingAs($supervisor)
         ->post("/supervisor/koreksi/{$koreksi->id}/tolak", ['catatan_approver' => 'Barang sudah benar'])
-        ->assertRedirect(route('supervisor.koreksi.index'));
+        ->assertRedirect(route('supervisor.pusat-verifikasi', ['tab' => 'koreksi', 'status' => 'menunggu_approval']));
 
     $koreksi->refresh();
     expect($koreksi->status)->toBe('ditolak');
@@ -432,7 +432,7 @@ it('menerima koreksi tanpa transaksi asli (uang tidak layak edar / temuan)', fun
     $this->actingAs($supervisor)
         ->post("/supervisor/koreksi/{$koreksi->id}/approve", [
             'catatan_approver' => 'Disetujui, uang tidak layak edar.',
-        ])->assertRedirect(route('supervisor.koreksi.index'));
+        ])->assertRedirect(route('supervisor.pusat-verifikasi', ['tab' => 'koreksi', 'status' => 'menunggu_approval']));
 
     $koreksi->refresh();
     expect($koreksi->status)->toBe('disetujui');

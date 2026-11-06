@@ -67,8 +67,9 @@
                 @endif
             </div>
             <div class="p-2 d-flex gap-2 border-top flex-wrap">
-                <a href="{{ route('admin.nasabah.index') }}" class="btn btn-primary"><i class="fa-solid fa-address-book me-1"></i>Lihat Daftar Nasabah</a>
-                <a href="{{ route('admin.nasabah.import') }}" class="btn btn-outline-primary"><i class="fa-solid fa-file-import me-1"></i>Import Lagi</a>
+                <a href="{{ route('admin.pengguna.index', ['tab' => 'list']) }}" class="btn btn-primary"><i class="fa-solid fa-address-book me-1"></i>Lihat Daftar Pengguna</a>
+                <a href="{{ route('admin.pengguna.index', ['tab' => 'history']) }}" class="btn btn-outline-secondary"><i class="fa-solid fa-clock-rotate-left me-1"></i>Riwayat Permanen</a>
+                <a href="{{ route('admin.pengguna.index', ['tab' => 'import']) }}" class="btn btn-outline-primary"><i class="fa-solid fa-file-import me-1"></i>Import Lagi</a>
             </div>
         </div>
     </div>

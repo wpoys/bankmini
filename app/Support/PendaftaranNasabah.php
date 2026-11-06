@@ -158,6 +158,7 @@ class PendaftaranNasabah
 
             if (! empty($data['pin_keamanan'])) {
                 $akun->update(['password' => Hash::make($data['pin_keamanan'])]);
+                $akun->bukaKunciVerifikasiPin();
             }
 
             ActivityLog::catat(

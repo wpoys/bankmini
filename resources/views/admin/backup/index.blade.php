@@ -4,6 +4,7 @@
 @section('page-title', 'Backup Database')
 @section('page-subtitle', 'Kelola salinan cadangan data bank mini')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -13,23 +14,20 @@
             </div>
         </div>
 
-        <div class="data-panel mb-3">
-            <div class="panel-body py-3 px-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div class="small text-muted">
-                    <i class="fa-solid fa-database me-1"></i>
-                    Salinan database tersimpan di <code>storage/app/backups</code>.
-                    Skedul otomatis dapat dijalankan lewat perintah <code>php artisan bankmini:backup</code>.
-                </div>
-                <form action="{{ route('admin.backup.store') }}" method="POST">
-                    @csrf
-                    <button class="btn btn-success btn-sm"><i class="fa-solid fa-shield-halved me-1"></i>Buat Backup Sekarang</button>
-                </form>
-            </div>
-        </div>
-
         <div class="data-panel">
             <div class="panel-head">
                 <div class="panel-title"><span class="dot"></span>Daftar Backup</div>
+                <div class="table-toolbar">
+                    <div class="small text-muted">
+                        <i class="fa-solid fa-database me-1"></i>
+                        Salinan database tersimpan di <code>storage/app/backups</code>.
+                        Skedul otomatis dapat dijalankan lewat perintah <code>php artisan bankmini:backup</code>.
+                    </div>
+                    <form action="{{ route('admin.backup.store') }}" method="POST">
+                        @csrf
+                        <button class="btn btn-success btn-sm"><i class="fa-solid fa-shield-halved me-1"></i>Buat Backup Sekarang</button>
+                    </form>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle table-nowrap mb-0">

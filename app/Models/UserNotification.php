@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Support\FirebaseMessaging;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -16,8 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $pesan
  * @property string|null $url
  * @property string|null $read_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read bool $sudah_dibaca
  * @property-read string $icon
  * @property-read User $user
@@ -60,20 +62,27 @@ class UserNotification extends Model
     /**
      * Buat notifikasi baru untuk seorang user.
      */
-    public static function kirim(User|int $user, string $tipe, string $judul, ?string $pesan = null, ?string $url = null): self
+    public static function kirim(User|int $user, string $tipe, string $judul, ?string $pesan = null, ?string $url = null, array $pushData = []): self
     {
-        return self::create([
+        $notification = self::create([
             'user_id' => $user instanceof User ? $user->id : $user,
             'tipe' => $tipe,
             'judul' => $judul,
             'pesan' => $pesan,
             'url' => $url,
         ]);
+
+        $target = $user instanceof User ? $user : User::find($user);
+        if ($target) {
+            FirebaseMessaging::send($target, $judul, $pesan ?: $judul, $pushData);
+        }
+
+        return $notification;
     }
 
     public function tandaiDibaca(): void
     {
-        if (!$this->read_at) {
+        if (! $this->read_at) {
             $this->update(['read_at' => now()]);
         }
     }

@@ -4,17 +4,13 @@
 @section('page-title', 'Laporan Harian')
 @section('page-subtitle', 'Kelola laporan harian transaksi Anda')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
             <div>
                 <h1>Riwayat Laporan Kas</h1>
                 <div class="page-header-sub">Semua laporan rekonsiliasi loket Anda</div>
-            </div>
-            <div class="header-actions">
-                <a href="{{ route('teller.laporan.create') }}" class="btn btn-success btn-sm">
-                    <i class="fa-solid fa-plus me-1"></i>Buat Laporan Hari Ini
-                </a>
             </div>
         </div>
 
@@ -33,6 +29,9 @@
                         <option value="disetujui">Disetujui</option>
                         <option value="ditolak">Ditolak</option>
                     </select>
+                    <a href="{{ route('teller.laporan.create') }}" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-plus me-1"></i>Buat Laporan Hari Ini
+                    </a>
                 </div>
             </div>
             <div class="table-responsive">

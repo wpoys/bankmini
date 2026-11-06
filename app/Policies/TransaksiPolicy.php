@@ -57,6 +57,10 @@ class TransaksiPolicy
 
     protected function bolehAkses(User $user, Transaksi $transaksi): bool
     {
+        if ($transaksi->status !== Transaksi::STATUS_APPROVED) {
+            return false;
+        }
+
         if ($user->isAdmin() || $user->isSupervisor()) {
             return true;
         }

@@ -28,6 +28,7 @@ class VerifikasiHarianService
         $tanggalTerdaftar = Transaksi::query()
             ->selectRaw('DATE(tanggal) as tgl, COUNT(*) as jml')
             ->whereNotNull('tanggal')
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->groupBy('tgl')
             ->orderByDesc('tgl')
             ->limit($limit)
@@ -51,7 +52,7 @@ class VerifikasiHarianService
     {
         $row = Transaksi::query()
             ->whereDate('tanggal', $tanggal)
-            ->where('status', '!=', Transaksi::STATUS_DITOLAK)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->selectRaw('
                 COUNT(*) as jumlah,
                 SUM(CASE WHEN jenis_trans IN ("setoran","koreksi_setoran") THEN nominal ELSE 0 END) as total_setoran,
@@ -91,6 +92,7 @@ class VerifikasiHarianService
     {
         return Transaksi::with(['nasabah', 'user'])
             ->whereDate('tanggal', $tanggal)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();

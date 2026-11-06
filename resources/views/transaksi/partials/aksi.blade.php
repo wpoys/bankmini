@@ -12,9 +12,15 @@
 @endphp
 @if ($strukLihat)
     <div class="d-flex gap-1 justify-content-end text-nowrap">
-        <a href="{{ $strukLihat }}" class="btn btn-sm btn-outline-primary" title="Lihat struk {{ $transaksi->no_struk }}">
-            <i class="fa-solid fa-receipt me-1"></i>Lihat Struk
-        </a>
+        @if (!empty($strukDalamModal))
+            <button type="button" class="btn btn-sm btn-outline-primary" data-struk-modal="{{ $strukLihat }}?modal=1" title="Lihat struk {{ $transaksi->no_struk }}">
+                <i class="fa-solid fa-receipt me-1"></i>Lihat Struk
+            </button>
+        @else
+            <a href="{{ $strukLihat }}" class="btn btn-sm btn-outline-primary" title="Lihat struk {{ $transaksi->no_struk }}">
+                <i class="fa-solid fa-receipt me-1"></i>Lihat Struk
+            </a>
+        @endif
         @if ($strukCetak)
             <a href="{{ $strukCetak }}?cetak=1" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary"
                title="Cetak struk {{ $transaksi->no_struk }}" aria-label="Cetak struk {{ $transaksi->no_struk }}">

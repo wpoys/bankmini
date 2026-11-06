@@ -34,7 +34,8 @@
     .r-box-label { font-size: 0.7em; letter-spacing: 0.4px; }
     .r-box-nilai { font-weight: bold; font-size: 1.3em; margin: 1px 0; }
     .r-qr-area { text-align: center; margin-top: 6px; }
-    .r-qr img, .r-qr svg { width: 94px; height: 94px; }
-    .r-qr-teks { font-size: 0.68em; }
+    .r-qr { display: block; width: 100%; text-align: center; }
+    .r-qr img, .r-qr svg { display: block; width: 94px; height: 94px; margin: 0 auto; }
+    .r-qr-teks { font-size: 0.68em; text-align: center; }
     .r-footer-teks { text-align: center; font-size: 0.68em; line-height: 1.35; }
 </style>

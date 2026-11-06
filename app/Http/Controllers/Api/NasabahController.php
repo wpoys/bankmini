@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Nasabah;
 use App\Models\PermintaanResetPin;
 use App\Models\Transaksi;
+use App\Models\User;
 use App\Support\ApiFormatter;
 use App\Support\PermintaanPinService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -26,13 +27,14 @@ class NasabahController extends Controller
             return $this->gagal('Data nasabah tidak ditemukan.', 404);
         }
 
-        $totalTransaksi = $nasabah->transaksi()->count();
-        $totalSetoran = (int) $nasabah->transaksi()->where('jenis_trans', Transaksi::JENIS_SETORAN)->sum('nominal');
-        $totalPenarikan = (int) $nasabah->transaksi()->where('jenis_trans', Transaksi::JENIS_PENARIKAN)->sum('nominal');
+        $totalTransaksi = $nasabah->transaksi()->where('status', Transaksi::STATUS_APPROVED)->count();
+        $totalSetoran = (int) $nasabah->transaksi()->where('status', Transaksi::STATUS_APPROVED)->where('jenis_trans', Transaksi::JENIS_SETORAN)->sum('nominal');
+        $totalPenarikan = (int) $nasabah->transaksi()->where('status', Transaksi::STATUS_APPROVED)->where('jenis_trans', Transaksi::JENIS_PENARIKAN)->sum('nominal');
         $pending = $nasabah->transaksi()->where('status', Transaksi::STATUS_PENDING)->count();
 
         $terbaru = $nasabah->transaksi()
             ->with('user')
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->orderByDesc('tanggal')
             ->orderByDesc('id')
             ->limit(self::TERBARU)
@@ -89,6 +91,34 @@ class NasabahController extends Controller
         ]);
     }
 
+    public function daftarkanPerangkat(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'token' => ['required', 'string', 'max:4096'],
+            'aktif' => ['nullable', 'boolean'],
+        ]);
+
+        $user = $request->user();
+        $token = trim($validated['token']);
+        $aktif = ! $request->has('aktif') || $request->boolean('aktif');
+
+        if ($aktif) {
+            User::where('fcm_token', $token)
+                ->where('id', '!=', $user->id)
+                ->update(['fcm_token' => null]);
+            $user->forceFill(['fcm_token' => $token])->save();
+        } elseif ($user->fcm_token === $token) {
+            $user->forceFill(['fcm_token' => null])->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $aktif ? 'Perangkat berhasil didaftarkan.' : 'Perangkat berhasil dinonaktifkan.',
+            'data' => (object) [],
+            'meta' => (object) [],
+        ]);
+    }
+
     public function transaksi(Request $request): JsonResponse
     {
         $nasabah = $this->nasabah($request);
@@ -117,6 +147,7 @@ class NasabahController extends Controller
 
         $transaksi = $nasabah->transaksi()
             ->with('user')
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->when($validated['jenis'] ?? null, fn ($q, $jenis) => $q->where('jenis_trans', $jenis))
             ->when($validated['dari'] ?? null, fn ($q, $dari) => $q->whereDate('tanggal', '>=', $dari))
             ->when($validated['sampai'] ?? null, fn ($q, $sampai) => $q->whereDate('tanggal', '<=', $sampai))
@@ -149,6 +180,7 @@ class NasabahController extends Controller
 
         $data = Transaksi::with(['user', 'nasabah'])
             ->where('id_nasabah', $nasabah->id)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->find($transaksi);
 
         if (! $data) {
@@ -188,6 +220,7 @@ class NasabahController extends Controller
         $query = Transaksi::with('user')
             ->where('id_nasabah', $nasabah->id)
             ->where('koreksi_id', null)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->when($validated['jenis'] ?? null, fn ($q, $jenis) => $q->where('jenis_trans', $jenis))
             ->when($validated['dari'] ?? null, fn ($q, $dari) => $q->whereDate('tanggal', '>=', $dari))
             ->when($validated['sampai'] ?? null, fn ($q, $sampai) => $q->whereDate('tanggal', '<=', $sampai));

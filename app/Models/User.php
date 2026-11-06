@@ -5,11 +5,13 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -22,15 +24,15 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $status
  * @property string|null $fcm_token
  * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read string $role_label
  * @property-read Nasabah|null $nasabah
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Transaksi> $transaksi
- * @property-read \Illuminate\Database\Eloquent\Collection<int, LaporanHarian> $laporanHarian
- * @property-read \Illuminate\Database\Eloquent\Collection<int, LaporanHarian> $approvedLaporan
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ActivityLog> $activityLogs
- * @property-read \Illuminate\Database\Eloquent\Collection<int, UserNotification> $userNotifications
+ * @property-read Collection<int, Transaksi> $transaksi
+ * @property-read Collection<int, LaporanHarian> $laporanHarian
+ * @property-read Collection<int, LaporanHarian> $approvedLaporan
+ * @property-read Collection<int, ActivityLog> $activityLogs
+ * @property-read Collection<int, UserNotification> $userNotifications
  */
 #[Fillable(['username', 'email', 'password', 'nama_petugas', 'role', 'status', 'status_aktivasi', 'fcm_token'])]
 #[Hidden(['password', 'remember_token'])]
@@ -72,6 +74,10 @@ class User extends Authenticatable
             'token_aktivasi_kadaluarsa' => 'datetime',
             'percobaan_aktivasi' => 'integer',
             'jumlah_kirim_ulang' => 'integer',
+            'pin_auth_fail_count' => 'integer',
+            'pin_auth_lock_level' => 'integer',
+            'pin_auth_locked_until' => 'datetime',
+            'pin_auth_admin_lock' => 'boolean',
         ];
     }
 
@@ -133,5 +139,15 @@ class User extends Authenticatable
     public function getRoleLabelAttribute(): string
     {
         return self::ROLE_OPTION[$this->role] ?? ucfirst($this->role);
+    }
+
+    public function bukaKunciVerifikasiPin(): void
+    {
+        $this->forceFill([
+            'pin_auth_fail_count' => 0,
+            'pin_auth_lock_level' => 0,
+            'pin_auth_locked_until' => null,
+            'pin_auth_admin_lock' => false,
+        ])->save();
     }
 }

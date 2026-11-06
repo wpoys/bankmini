@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AktivasiController;
 use App\Http\Controllers\Api\NasabahController;
 use App\Http\Controllers\Api\NotifikasiController;
+use App\Http\Controllers\Api\OtorisasiNasabahController;
 use App\Http\Controllers\Api\PasswordResetController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,7 +34,12 @@ Route::middleware(['auth:sanctum', 'check.active.api'])->group(function () {
         Route::get('/saldo', [NasabahController::class, 'saldo']);
         Route::get('/profil', [NasabahController::class, 'profil']);
         Route::post('/ubah-pin', [NasabahController::class, 'ubahPin'])->middleware('throttle:5,1');
+        Route::post('/perangkat', [NasabahController::class, 'daftarkanPerangkat'])->middleware('throttle:10,1');
         Route::get('/pengajuan-pin', [NasabahController::class, 'statusPengajuanPin']);
+        Route::get('/otorisasi', [OtorisasiNasabahController::class, 'index']);
+        Route::get('/otorisasi/{id}', [OtorisasiNasabahController::class, 'show'])->whereNumber('id');
+        Route::post('/otorisasi/{id}/setuju', [OtorisasiNasabahController::class, 'approve'])->whereNumber('id')->middleware('throttle:10,1');
+        Route::post('/otorisasi/{id}/tolak', [OtorisasiNasabahController::class, 'reject'])->whereNumber('id');
         Route::get('/transaksi', [NasabahController::class, 'transaksi']);
         Route::get('/transaksi/cetak', [NasabahController::class, 'cetakMutasi']);
         Route::get('/transaksi/{transaksi}', [NasabahController::class, 'detailTransaksi'])

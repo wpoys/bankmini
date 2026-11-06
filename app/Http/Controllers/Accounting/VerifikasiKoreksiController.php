@@ -13,25 +13,9 @@ use App\Support\NomorGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
 
 class VerifikasiKoreksiController extends Controller
 {
-    public function index(Request $request): View
-    {
-        $koreksi = KoreksiTransaksi::with(['transaksi.nasabah', 'nasabah', 'pengaju', 'approver'])
-            ->when($request->status && $request->status !== 'all', fn ($q) => $q->where('status', $request->status))
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
-
-        $menunggu = (int) KoreksiTransaksi::where('status', 'menunggu_approval')->count();
-
-        $kodeSandiTersetel = Konfigurasi::kodeSandiKoreksiTersetel();
-
-        return view('supervisor.koreksi.index', compact('koreksi', 'menunggu', 'kodeSandiTersetel'));
-    }
-
     public function approve(Request $request, KoreksiTransaksi $koreksi): RedirectResponse
     {
         $kodeSandiWajib = Konfigurasi::kodeSandiKoreksiTersetel();
@@ -130,7 +114,7 @@ class VerifikasiKoreksiController extends Controller
                 );
             });
 
-            return redirect()->route('supervisor.koreksi.index')
+            return $this->redirectKePusatVerifikasi($request)
                 ->with('success', 'Koreksi disetujui. Transaksi koreksi telah dibuat dan saldo nasabah diperbarui.');
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
@@ -168,8 +152,24 @@ class VerifikasiKoreksiController extends Controller
             route('teller.koreksi.index'),
         );
 
-        return redirect()->route('supervisor.koreksi.index')
+        return $this->redirectKePusatVerifikasi($request)
             ->with('success', 'Pengajuan koreksi ditolak.');
+    }
+
+    protected function redirectKePusatVerifikasi(Request $request): RedirectResponse
+    {
+        if ($request->input('hub') === '1') {
+            return redirect()->route('supervisor.pusat-verifikasi', [
+                'tab' => 'koreksi',
+                'status' => $request->input('status', 'menunggu_approval'),
+                'cari' => $request->input('cari'),
+            ]);
+        }
+
+        return redirect()->route('supervisor.pusat-verifikasi', [
+            'tab' => 'koreksi',
+            'status' => 'menunggu_approval',
+        ]);
     }
 
     protected function catatJurnal(int $idTransaksi, int $nominal, string $jenis): void

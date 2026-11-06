@@ -16,7 +16,9 @@ class DashboardController extends Controller
     {
         $totalNasabah = Nasabah::count();
         $totalUser = User::count();
-        $transaksiHariIni = Transaksi::whereDate('tanggal', today())->count();
+        $transaksiHariIni = Transaksi::whereDate('tanggal', today())
+            ->where('status', Transaksi::STATUS_APPROVED)
+            ->count();
         $laporanPending = LaporanHarian::where('status', 'menunggu_approval')->count();
         $nasabahBaruHariIni = Nasabah::whereDate('created_at', today())->count();
 
@@ -58,10 +60,12 @@ class DashboardController extends Controller
             $labels[] = $date->format('d/m');
 
             $setoran[] = (int) Transaksi::whereDate('tanggal', $date)
+                ->where('status', Transaksi::STATUS_APPROVED)
                 ->where('jenis_trans', 'setoran')
                 ->sum('nominal');
 
             $penarikan[] = (int) Transaksi::whereDate('tanggal', $date)
+                ->where('status', Transaksi::STATUS_APPROVED)
                 ->where('jenis_trans', 'penarikan')
                 ->sum('nominal');
         }

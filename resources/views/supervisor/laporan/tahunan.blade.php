@@ -4,6 +4,7 @@
 @section('page-title', 'Laporan Tahunan')
 @section('page-subtitle', 'Rekapitulasi keuangan bank mini per tahun')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -13,9 +14,8 @@
             </div>
         </div>
 
-        <div class="data-panel mb-3">
-            <div class="panel-body py-3 px-3 d-flex align-items-end gap-2 flex-wrap">
-                <form class="d-flex gap-2 align-items-end flex-wrap" method="GET">
+        <div class="list-toolbar">
+            <form class="d-flex gap-2 align-items-end flex-wrap" method="GET">
                     <div>
                         <label class="form-label">Tahun</label>
                         <select name="tahun" class="form-select form-select-sm">
@@ -30,7 +30,6 @@
                     <a href="{{ route('supervisor.laporan.laporan-tahunan', array_merge(request()->query(), ['format' => 'excel'])) }}" class="btn btn-sm btn-success"><i class="fa-solid fa-file-excel me-1"></i>Excel</a>
                     <a href="{{ route('supervisor.laporan.laporan-tahunan', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="btn btn-sm btn-danger"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
                 </div>
-            </div>
         </div>
 
         <div class="row g-3 mb-3">

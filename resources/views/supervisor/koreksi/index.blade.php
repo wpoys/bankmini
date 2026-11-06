@@ -3,6 +3,7 @@
 @section('title', 'Verifikasi Koreksi')
 @section('page-title', 'Verifikasi Koreksi')
 @section('page-subtitle', 'Persetujuan koreksi transaksi oleh Accounting')
+@section('list-page-class', 'list-page')
 
 @section('content')
     <div class="page-animate">

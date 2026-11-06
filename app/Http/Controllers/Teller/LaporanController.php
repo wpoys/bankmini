@@ -129,6 +129,7 @@ class LaporanController extends Controller
 
                 $transaksiHariIni = Transaksi::where('id_user', Auth::id())
                     ->whereDate('tanggal', today())
+                    ->where('status', Transaksi::STATUS_APPROVED)
                     ->pluck('id');
 
                 if ($transaksiHariIni->isNotEmpty()) {
@@ -150,6 +151,10 @@ class LaporanController extends Controller
             });
 
             ActivityLog::catat(Auth::id(), 'buat_laporan', 'Laporan harian dibuat/diupdate untuk tanggal '.$laporan->tanggal.'.');
+
+            if ($request->boolean('submit_after_save')) {
+                return $this->submit($laporan);
+            }
 
             $message = 'Laporan harian berhasil disimpan. ';
             $message .= $selisih === 0

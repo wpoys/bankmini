@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\LaporanHarian;
 use App\Models\Nasabah;
 use App\Models\Transaksi;
 use App\Models\User;
@@ -16,7 +17,9 @@ class VerifikasiTransaksiHarianTest extends TestCase
     use RefreshDatabase;
 
     protected User $teller;
+
     protected User $supervisor;
+
     protected Nasabah $nasabah;
 
     protected function setUp(): void
@@ -93,7 +96,7 @@ class VerifikasiTransaksiHarianTest extends TestCase
     {
         $this->buatTransaksi('2026-09-01', 'setoran', 100000, 'H-001');
 
-        \App\Models\LaporanHarian::create([
+        LaporanHarian::create([
             'teller_id' => $this->teller->id,
             'tanggal' => '2026-09-01',
             'saldo_awal_kas' => 0,
@@ -126,6 +129,45 @@ class VerifikasiTransaksiHarianTest extends TestCase
         $this->assertNotNull($v);
         $this->assertSame(1, $v->jumlah_transaksi);
         $this->assertSame($this->supervisor->id, $v->verifikasi_oleh);
+    }
+
+    public function test_penolakan_wajib_memiliki_catatan_dan_mengirim_notifikasi_ke_teller(): void
+    {
+        $this->buatTransaksi('2026-09-01', 'setoran', 10000, 'H-001');
+
+        $response = $this->actingAs($this->supervisor)
+            ->post(route('verifikasi.proses', '2026-09-01'), ['keputusan' => 'ditolak']);
+
+        $response->assertSessionHasErrors('catatan');
+
+        $this->actingAs($this->supervisor)
+            ->post(route('verifikasi.proses', '2026-09-01'), [
+                'keputusan' => 'ditolak',
+                'catatan' => 'Bukti transaksi belum lengkap.',
+            ])
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('verifikasi_harian', [
+            'tanggal' => '2026-09-01',
+            'status' => 'ditolak',
+            'catatan' => 'Bukti transaksi belum lengkap.',
+        ]);
+        $this->assertDatabaseHas('user_notifications', [
+            'user_id' => $this->teller->id,
+            'tipe' => 'danger',
+            'judul' => 'Verifikasi transaksi ditolak',
+        ]);
+    }
+
+    public function test_verifikasi_yang_ditolak_dapat_diterima_setelah_ditinjau_ulang(): void
+    {
+        $this->buatTransaksi('2026-09-01', 'setoran', 10000, 'H-001');
+
+        VerifikasiHarianProses::verifikasi('2026-09-01', $this->supervisor, 'Bukti belum lengkap.', 'ditolak');
+        $hasil = VerifikasiHarianProses::verifikasi('2026-09-01', $this->supervisor, null, 'diterima');
+
+        $this->assertSame('diterima', $hasil->status);
+        $this->assertNull($hasil->catatan);
     }
 
     public function test_verifikasi_tidak_dapat_diulang(): void

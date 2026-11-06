@@ -212,6 +212,7 @@ class LaporanController extends Controller
 
         $data = Transaksi::whereYear('tanggal', $tahun)
             ->where('koreksi_id', null)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->whereIn('jenis_trans', [Transaksi::JENIS_SETORAN, Transaksi::JENIS_PENARIKAN])
             ->selectRaw('jenis_trans, COUNT(*) as jumlah, SUM(nominal) as nominal')
             ->groupBy('jenis_trans')
@@ -229,8 +230,10 @@ class LaporanController extends Controller
             $perBulan[] = [
                 'bulan' => Carbon::create()->month($bulan)->translatedFormat('F'),
                 'setoran' => (int) Transaksi::whereYear('tanggal', $tahun)->whereMonth('tanggal', $bulan)
+                    ->where('status', Transaksi::STATUS_APPROVED)
                     ->where('jenis_trans', Transaksi::JENIS_SETORAN)->where('koreksi_id', null)->sum('nominal'),
                 'penarikan' => (int) Transaksi::whereYear('tanggal', $tahun)->whereMonth('tanggal', $bulan)
+                    ->where('status', Transaksi::STATUS_APPROVED)
                     ->where('jenis_trans', Transaksi::JENIS_PENARIKAN)->where('koreksi_id', null)->sum('nominal'),
             ];
         }
@@ -242,6 +245,7 @@ class LaporanController extends Controller
             foreach ($rows as $i => $row) {
                 $rows[$i]['jumlah'] = (int) Transaksi::whereYear('tanggal', $tahun)
                     ->whereMonth('tanggal', $i + 1)
+                    ->where('status', Transaksi::STATUS_APPROVED)
                     ->where('koreksi_id', null)
                     ->count();
             }
@@ -274,6 +278,7 @@ class LaporanController extends Controller
         $mutasiRows = $nasabah->transaksi()
             ->whereBetween('tanggal', [$mulai, $sampai])
             ->where('koreksi_id', null)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->orderBy('tanggal')
             ->orderBy('id')
             ->get();
@@ -281,6 +286,7 @@ class LaporanController extends Controller
         $saldoAwal = (int) Transaksi::where('id_nasabah', $nasabah->id)
             ->where('tanggal', '<', $mulai)
             ->where('koreksi_id', null)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->sum(DB::raw('CASE WHEN jenis_trans = "setoran" THEN nominal ELSE -nominal END'));
 
         $running = $saldoAwal;
@@ -370,11 +376,13 @@ class LaporanController extends Controller
         $saldoAwal = (int) Transaksi::where('id_nasabah', $nasabah->id)
             ->where('tanggal', '<', $mulai)
             ->where('koreksi_id', null)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->sum(DB::raw('CASE WHEN jenis_trans = "setoran" THEN nominal ELSE -nominal END'));
 
         $transaksi = $nasabah->transaksi()
             ->whereBetween('tanggal', [$mulai, $sampai])
             ->where('koreksi_id', null)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->get();
 
         $totalDebit = (int) $transaksi->where('jenis_trans', Transaksi::JENIS_SETORAN)->sum('nominal');
@@ -421,6 +429,7 @@ class LaporanController extends Controller
     {
         $data = Transaksi::whereYear('tanggal', $tahun)
             ->where('koreksi_id', null)
+            ->where('status', Transaksi::STATUS_APPROVED)
             ->whereIn('jenis_trans', [Transaksi::JENIS_SETORAN, Transaksi::JENIS_PENARIKAN])
             ->selectRaw('jenis_trans, COUNT(*) as jumlah, SUM(nominal) as nominal')
             ->groupBy('jenis_trans')

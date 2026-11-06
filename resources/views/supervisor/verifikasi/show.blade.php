@@ -221,6 +221,12 @@
 
                             <form method="POST" action="{{ route('supervisor.verifikasi.approve', $laporan->id) }}">
                                 @csrf
+                                @if ($hubContext)
+                                    <input type="hidden" name="hub" value="1">
+                                    <input type="hidden" name="tab" value="{{ $hubContext['tab'] }}">
+                                    <input type="hidden" name="status" value="{{ $hubContext['status'] }}">
+                                    <input type="hidden" name="cari" value="{{ $hubContext['cari'] }}">
+                                @endif
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Catatan <small class="text-muted">(opsional)</small></label>
                                     <textarea name="catatan_supervisor" rows="2" class="form-control" placeholder="Catatan untuk laporan ini..."></textarea>
@@ -246,6 +252,12 @@
 
                             <form method="POST" action="{{ route('supervisor.verifikasi.pending', $laporan->id) }}">
                                 @csrf
+                                @if ($hubContext)
+                                    <input type="hidden" name="hub" value="1">
+                                    <input type="hidden" name="tab" value="{{ $hubContext['tab'] }}">
+                                    <input type="hidden" name="status" value="{{ $hubContext['status'] }}">
+                                    <input type="hidden" name="cari" value="{{ $hubContext['cari'] }}">
+                                @endif
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Catatan Penahanan <span class="text-danger">*</span></label>
                                     <textarea name="catatan_supervisor" rows="2" class="form-control" required placeholder="Wajib diisi — jelaskan selisih yang harus diperbaiki teller..."></textarea>
@@ -260,6 +272,12 @@
 
                             <form method="POST" action="{{ route('supervisor.verifikasi.reject', $laporan->id) }}">
                                 @csrf
+                                @if ($hubContext)
+                                    <input type="hidden" name="hub" value="1">
+                                    <input type="hidden" name="tab" value="{{ $hubContext['tab'] }}">
+                                    <input type="hidden" name="status" value="{{ $hubContext['status'] }}">
+                                    <input type="hidden" name="cari" value="{{ $hubContext['cari'] }}">
+                                @endif
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Alasan Penolakan <span class="text-danger">*</span></label>
                                     <textarea name="catatan_supervisor" rows="2" class="form-control" required placeholder="Wajib diisi untuk penolakan..."></textarea>

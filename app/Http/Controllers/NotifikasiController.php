@@ -30,8 +30,18 @@ class NotifikasiController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $selectedId = $request->query('selected');
+        $selected = $selectedId
+            ? (clone $query)->find($selectedId)
+            : $notifikasi->first();
+
+        if ($selected && $selected->user_id !== $user->id) {
+            $selected = null;
+        }
+
         $data = [
             'notifikasi' => $notifikasi,
+            'selected' => $selected,
             'jumlahBelumDibaca' => (clone $query)->belumDibaca()->count(),
             'jumlahSudahDibaca' => (clone $query)->sudahDibaca()->count(),
             'jumlahTotal' => (clone $query)->count(),

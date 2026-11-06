@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nasabah;
+use App\Models\NasabahImportBatch;
 use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -14,12 +15,16 @@ class PenggunaController extends Controller
 {
     public function index(Request $request): View
     {
-        $filter = strtolower(trim($request->get('filter', 'admin')));
+        $activeTab = in_array($request->get('tab'), ['list', 'import', 'history'], true) ? $request->get('tab') : 'list';
+        $batches = NasabahImportBatch::with('importer')->latest()->paginate(10, ['*'], 'imports_page')->withQueryString();
+        $totalUsers = User::whereIn('role', [User::ROLE_ADMIN, User::ROLE_SUPERVISOR, User::ROLE_TELLER])->count() + Nasabah::count();
+        $activeUsers = User::where('status', 'active')->whereIn('role', [User::ROLE_ADMIN, User::ROLE_SUPERVISOR, User::ROLE_TELLER])->count() + Nasabah::where('arsip', false)->count();
+        $filter = strtolower(trim($request->get('filter', 'all')));
         $search = trim($request->get('search'));
 
-        $allowed = ['admin', 'supervisor', 'teller', 'nasabah'];
+        $allowed = ['all', 'admin', 'supervisor', 'teller', 'nasabah'];
         if (! in_array($filter, $allowed, true)) {
-            $filter = 'admin';
+            $filter = 'all';
         }
 
         $petugasQuery = null;
@@ -57,10 +62,10 @@ class PenggunaController extends Controller
                             ->orWhere('users.nama_petugas', 'like', "%{$search}%");
                     });
                 })
-                ->where('users.role', $filter);
+                ->when($filter !== 'all', fn (Builder $q) => $q->where('users.role', $filter));
         }
 
-        if ($filter === 'nasabah') {
+        if (in_array($filter, ['nasabah', 'all'], true)) {
             $nasabahQuery = DB::table('nasabah')
                 ->leftJoin('users', 'users.id', '=', 'nasabah.user_id')
                 ->selectRaw("
@@ -81,6 +86,7 @@ class PenggunaController extends Controller
                     nasabah.created_at AS created_at,
                     nasabah.updated_at AS updated_at
                 ")
+                ->when($filter !== 'all', fn (Builder $q) => $q)
                 ->when($search !== '', function (Builder $q) use ($search) {
                     $q->where(function (Builder $sub) use ($search) {
                         $sub->where('nasabah.nama_siswa', 'like', "%{$search}%")
@@ -110,6 +116,6 @@ class PenggunaController extends Controller
 
         $pengguna = $items->paginate($perPage)->withQueryString();
 
-        return view('admin.pengguna.index', compact('filter', 'search', 'pengguna'));
+        return view('admin.pengguna.index', compact('filter', 'search', 'pengguna', 'activeTab', 'batches', 'totalUsers', 'activeUsers'));
     }
 }

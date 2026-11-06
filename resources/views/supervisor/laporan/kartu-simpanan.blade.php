@@ -4,6 +4,7 @@
 @section('page-title', 'Kartu Simpanan')
 @section('page-subtitle', 'Daftar nasabah simpanan')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">

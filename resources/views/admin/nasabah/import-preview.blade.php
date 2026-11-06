@@ -13,6 +13,7 @@
             </div>
         </div>
 
+        <div class="d-flex justify-content-end mb-2"><a href="{{ route('admin.pengguna.index', ['tab' => 'history']) }}" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-clock-rotate-left me-1"></i>Riwayat Import</a></div>
         <div class="alert alert-info small d-flex align-items-center gap-2">
             <i class="fa-solid fa-eye"></i>
             <span>

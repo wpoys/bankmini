@@ -4,6 +4,7 @@
 @section('page-title', 'Audit Trail')
 @section('page-subtitle', 'Riwayat aktivitas seluruh pengguna sistem')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">

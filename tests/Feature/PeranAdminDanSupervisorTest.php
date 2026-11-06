@@ -121,7 +121,7 @@ it('allows supervisor to approve koreksi transaksi and update saldo + jurnal', f
 
     $this->actingAs($supervisor)
         ->post("/supervisor/koreksi/{$koreksi->id}/approve")
-        ->assertRedirect(route('supervisor.koreksi.index'))
+        ->assertRedirect(route('supervisor.pusat-verifikasi', ['tab' => 'koreksi', 'status' => 'menunggu_approval']))
         ->assertSessionHas('success');
 
     $nasabah->refresh();
@@ -161,7 +161,7 @@ it('allows supervisor to reject koreksi transaksi without touching saldo', funct
 
     $this->actingAs($supervisor)
         ->post("/supervisor/koreksi/{$koreksi->id}/tolak", ['catatan_approver' => 'Nominal transaksi sudah sesuai'])
-        ->assertRedirect(route('supervisor.koreksi.index'))
+        ->assertRedirect(route('supervisor.pusat-verifikasi', ['tab' => 'koreksi', 'status' => 'menunggu_approval']))
         ->assertSessionHas('success');
 
     $nasabah->refresh();

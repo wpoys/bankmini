@@ -4,6 +4,7 @@
 @section('page-title', 'Saldo per Produk')
 @section('page-subtitle', 'Rekapitulasi simpanan siswa vs guru/karyawan')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -13,8 +14,7 @@
             </div>
         </div>
 
-        <div class="data-panel mb-3">
-        <div class="panel-body py-3 px-3 d-flex align-items-end gap-2 flex-wrap">
+        <div class="list-toolbar">
             <form class="d-flex gap-2 align-items-end flex-wrap" method="GET">
                 <div>
                     <label class="form-label small mb-1 fw-semibold">Per Tanggal</label>
@@ -27,7 +27,6 @@
                 <a href="{{ route('supervisor.laporan.saldo-produk', array_merge(request()->query(), ['format' => 'pdf'])) }}" class="btn btn-sm btn-danger"><i class="fa-solid fa-file-pdf me-1"></i>PDF</a>
             </div>
         </div>
-    </div>
 
     <div class="data-panel">
         <div class="panel-head">

@@ -333,9 +333,20 @@
     /* ---------- Confirm modal helper (data-confirm attributes) ---------- */
     onReady(function () {
         const confirmModal = doc("#modalKonfirmasi");
-        if (!confirmModal) return;
-
         let pendingSubmit = null;
+
+        const continueAction = function (trigger) {
+            if (trigger.tagName === "FORM") {
+                if (typeof trigger.requestSubmit === "function") trigger.requestSubmit();
+                else trigger.submit();
+            } else if (trigger.tagName === "BUTTON" && trigger.form) {
+                if (typeof trigger.form.requestSubmit === "function") trigger.form.requestSubmit(trigger);
+                else trigger.form.submit();
+            } else {
+                const href = trigger.getAttribute("href");
+                if (href) window.location.href = href;
+            }
+        };
 
         document.addEventListener("click", function (e) {
             const trigger = e.target.closest(
@@ -350,48 +361,40 @@
                 trigger.getAttribute("data-confirm-title") ||
                 "Konfirmasi Tindakan";
 
-            doc("#konfirmasiJudul").textContent = title;
-            doc("#konfirmasiPesan").innerHTML = (message || "").replace(
-                /\\n|\n/g,
-                "<br>",
-            );
-
-            if (trigger.tagName === "FORM") {
+            if (!confirmModal || !window.bootstrap?.Modal) {
                 e.preventDefault();
-                pendingSubmit = trigger;
-                const modal = bootstrap.Modal.getOrCreateInstance(confirmModal);
-                modal.show();
-                return;
-            } else if (trigger.tagName === "BUTTON" && trigger.form) {
-                e.preventDefault();
-                pendingSubmit = function () {
-                    trigger.form.submit();
-                };
-                const modal = bootstrap.Modal.getOrCreateInstance(confirmModal);
-                modal.show();
-                return;
-            } else {
-                const href = trigger.getAttribute("href");
-                e.preventDefault();
-                pendingSubmit = function () {
-                    window.location.href = href;
-                };
-                const modal = bootstrap.Modal.getOrCreateInstance(confirmModal);
-                modal.show();
+                if (window.confirm(message)) continueAction(trigger);
                 return;
             }
+
+            const titleElement = doc("#konfirmasiJudul");
+            const messageElement = doc("#konfirmasiPesan");
+            if (titleElement) titleElement.textContent = title;
+            if (messageElement) {
+                messageElement.innerHTML = (message || "").replace(
+                    /\\n|\n/g,
+                    "<br>",
+                );
+            }
+
+            e.preventDefault();
+            pendingSubmit = function () {
+                continueAction(trigger);
+            };
+            window.bootstrap.Modal.getOrCreateInstance(confirmModal).show();
         });
 
-        doc("#btnKonfirmasiYa").addEventListener("click", function () {
-            if (pendingSubmit) {
-                if (typeof pendingSubmit === "function") pendingSubmit();
-                else pendingSubmit.submit();
-            }
-            if (confirmModal) {
-                const inst = bootstrap.Modal.getInstance(confirmModal);
-                if (inst) inst.hide();
-            }
-        });
+        const confirmButton = doc("#btnKonfirmasiYa");
+        if (confirmButton) {
+            confirmButton.addEventListener("click", function () {
+                if (pendingSubmit) pendingSubmit();
+                pendingSubmit = null;
+                if (confirmModal && window.bootstrap?.Modal) {
+                    const inst = window.bootstrap.Modal.getInstance(confirmModal);
+                    if (inst) inst.hide();
+                }
+            });
+        }
     });
 
     /* ---------- PIN modal (config modal, no faked endpoint) ---------- */

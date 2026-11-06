@@ -4,6 +4,7 @@
 @section('page-title', 'Manajemen User')
 @section('page-subtitle', 'Kelola akun petugas dan nasabah')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -11,33 +12,36 @@
                 <h1>Daftar User</h1>
                 <div class="page-header-sub">Kelola akun petugas dan nasabah</div>
             </div>
-            <div class="header-actions">
-                <form class="d-flex gap-2 align-items-center" method="GET">
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" name="search" value="{{ request('search') }}" class="form-control form-control-sm" placeholder="Cari username / nama">
-                    </div>
-                    <select name="role" class="form-select form-select-sm" style="width:auto">
-                        <option value="">Semua Role</option>
-                        @foreach (\App\Models\User::ROLE_OPTION as $val => $label)
-                            <option value="{{ $val }}" @selected(request('role') === $val)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
-                </form>
-                <a href="{{ route('admin.users.index', ['modal' => 'petugas']) }}" class="btn btn-success btn-sm">
-                    <i class="fa-solid fa-plus me-1"></i>Tambah Petugas</a>
-            </div>
+        </div>
+
+        <div class="nav nav-tabs mb-3" role="tablist" aria-label="Manajemen pengguna">
+            <a class="nav-link active" href="{{ route('admin.users.index') }}" aria-current="page">
+                <i class="fa-solid fa-users me-1"></i>Manajemen User
+            </a>
+            <a class="nav-link" href="{{ route('admin.nasabah.import') }}">
+                <i class="fa-solid fa-file-import me-1"></i>Impor Nasabah
+            </a>
         </div>
 
         <div class="data-panel">
             <div class="panel-head">
                 <div class="panel-title"><span class="dot"></span>Daftar akun pengguna</div>
                 <div class="table-toolbar">
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" class="form-control form-control-sm" data-table-filter placeholder="Filter di tabel...">
-                    </div>
+                    <form class="d-flex gap-2 align-items-center flex-wrap" method="GET">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" name="search" value="{{ request('search') }}" class="form-control form-control-sm" placeholder="Cari username / nama">
+                        </div>
+                        <select name="role" class="form-select form-select-sm" style="width:auto">
+                            <option value="">Semua Role</option>
+                            @foreach (\App\Models\User::ROLE_OPTION as $val => $label)
+                                <option value="{{ $val }}" @selected(request('role') === $val)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
+                    </form>
+                    <a href="{{ route('admin.users.index', ['modal' => 'petugas']) }}" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-plus me-1"></i>Tambah Petugas</a>
                 </div>
             </div>
             <div class="table-responsive">

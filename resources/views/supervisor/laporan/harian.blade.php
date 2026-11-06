@@ -4,6 +4,7 @@
 @section('page-title', 'Laporan Harian')
 @section('page-subtitle', 'Rekapitulasi laporan kas harian teller'.(isset($tellerTerpilih) && $tellerTerpilih ? ' — '.$tellerTerpilih->nama_petugas : ''))
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">

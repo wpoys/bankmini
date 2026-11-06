@@ -111,8 +111,8 @@ class PermintaanPinService
                 throw new \RuntimeException('Pengajuan ini sudah '.$terkunci->status_label.' dan tidak dapat diproses lagi.');
             }
 
-            if (! $terkunci->pin_baru_hash) {
-                throw new \RuntimeException('Pengajuan ini tidak memuat PIN baru dari nasabah.');
+            if (! $terkunci->ada_pin_baru) {
+                throw new \RuntimeException('Pengajuan ini tidak dapat disetujui karena PIN baru tidak tersimpan. Minta nasabah mengajukan ulang melalui aplikasi; pengajuan ini dapat ditolak dengan alasan.');
             }
 
             $nasabah = $terkunci->nasabah;
@@ -122,6 +122,7 @@ class PermintaanPinService
 
             $akun = $nasabah->user ?? $nasabah->ensureUser();
             $akun->update(['password' => $terkunci->pin_baru_hash]);
+            $akun->bukaKunciVerifikasiPin();
 
             $terkunci->update([
                 'status' => PermintaanResetPin::STATUS_DIPROSES,

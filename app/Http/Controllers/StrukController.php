@@ -6,6 +6,7 @@ use App\Models\Transaksi;
 use App\Support\ApiFormatter;
 use App\Support\InfoBank;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -32,11 +33,16 @@ class StrukController extends Controller
     /**
      * Halaman struk di layar (formal + tombol aksi).
      */
-    public function show(Transaksi $transaksi): View
+    public function show(Request $request, Transaksi $transaksi): View
     {
         Gate::authorize('viewStruk', $transaksi);
+        $data = $this->dataStruk($transaksi);
 
-        return view('transaksi.struk', $this->dataStruk($transaksi));
+        if ($request->boolean('modal')) {
+            return view('transaksi.struk-modal', $data);
+        }
+
+        return view('transaksi.struk', $data);
     }
 
     /**

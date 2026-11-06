@@ -4,17 +4,13 @@
 @section('page-title', 'Pengajuan Koreksi')
 @section('page-subtitle', 'Ajukan koreksi atas transaksi yang keliru')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
             <div>
                 <h1>Pengajuan Koreksi</h1>
                 <div class="page-header-sub">Koreksi atas transaksi yang keliru di loket Anda</div>
-            </div>
-            <div class="header-actions">
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAjukanKoreksi">
-                    <i class="fa-solid fa-plus me-1"></i>Ajukan Koreksi
-                </button>
             </div>
         </div>
 
@@ -32,10 +28,13 @@
                         <option value="disetujui">Disetujui</option>
                         <option value="ditolak">Ditolak</option>
                     </select>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAjukanKoreksi">
+                        <i class="fa-solid fa-plus me-1"></i>Ajukan Koreksi
+                    </button>
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle table-nowrap mb-0" data-filterable>
+                <table class="table table-hover align-middle table-nowrap koreksi-index-table mb-0" data-filterable>
                     <thead>
                         <tr>
                             <th>Tanggal</th>
@@ -60,9 +59,10 @@
                                         <span class="badge badge-soft-warning">Tanpa asli (temuan)</span>
                                     @endif
                                 </td>
-                                <td class="fw-semibold small">{{ $k->nasabah->nama_siswa }}
+                                <td class="koreksi-nasabah-cell">
+                                    <span class="koreksi-nasabah-nama">{{ $k->nasabah->nama_siswa }}</span>
                                     @if ($k->jenis_label)
-                                        <br><span class="badge badge-soft-info">{{ $k->jenis_label }}</span>
+                                        <span class="badge badge-soft-info">{{ $k->jenis_label }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -89,7 +89,7 @@
                                 </td>
                                 <td>
                                     @if ($t)
-                                        @include('transaksi.partials.aksi', ['transaksi' => $t])
+                                        @include('transaksi.partials.aksi', ['transaksi' => $t, 'strukDalamModal' => true])
                                     @else
                                         <span class="text-muted small">—</span>
                                     @endif
@@ -114,19 +114,128 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalAjukanKoreksi" tabindex="-1" aria-labelledby="modalAjukanKoreksiLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalAjukanKoreksiLabel">
-                        <i class="fa-solid fa-rotate-left text-primary me-2"></i>Ajukan Koreksi Transaksi
-                    </h5>
+    <div class="modal fade struk-koreksi-modal" id="modalStrukKoreksi" tabindex="-1" aria-labelledby="modalStrukKoreksiLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h2 class="modal-title fs-6" id="modalStrukKoreksiLabel"><i class="fa-solid fa-receipt me-2 text-primary"></i>Struk Transaksi</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <div class="modal-body p-0" style="height: 78vh;">
-                    <iframe src="{{ route('teller.koreksi.create', ['modal' => 1]) }}" title="Form Pengajuan Koreksi" class="w-100 h-100 border-0"></iframe>
+                <div class="modal-body p-0"><iframe id="iframeStrukKoreksi" title="Struk transaksi" loading="lazy"></iframe></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade koreksi-request-modal" id="modalAjukanKoreksi" tabindex="-1" aria-labelledby="modalAjukanKoreksiLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <h2 class="visually-hidden" id="modalAjukanKoreksiLabel">Ajukan Koreksi Transaksi</h2>
+                <div class="modal-body p-0">
+                    <iframe id="iframeAjukanKoreksi" src="{{ route('teller.koreksi.create', ['modal' => 1]) }}" title="Form Pengajuan Koreksi" class="w-100 border-0"></iframe>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        (() => {
+            const receiptModalElement = document.getElementById('modalStrukKoreksi');
+            const receiptFrame = document.getElementById('iframeStrukKoreksi');
+
+            document.addEventListener('click', (event) => {
+                const trigger = event.target.closest('[data-struk-modal]');
+                if (!trigger) return;
+                receiptFrame.src = trigger.dataset.strukModal;
+                bootstrap.Modal.getOrCreateInstance(receiptModalElement).show();
+            });
+
+            receiptModalElement.addEventListener('hidden.bs.modal', () => {
+                receiptFrame.src = 'about:blank';
+            });
+
+            window.addEventListener('message', (event) => {
+                if (event.origin !== window.location.origin || event.data !== 'tutup-struk-modal') return;
+                bootstrap.Modal.getOrCreateInstance(receiptModalElement).hide();
+            });
+        })();
+    </script>
+    <script>
+        (() => {
+            const modalElement = document.getElementById('modalAjukanKoreksi');
+            const iframe = document.getElementById('iframeAjukanKoreksi');
+            let submitting = false;
+
+            modalElement.addEventListener('show.bs.modal', () => {
+                submitting = false;
+                iframe.src = '{{ route('teller.koreksi.create', ['modal' => 1]) }}';
+            });
+
+            iframe.addEventListener('load', () => {
+                if (!submitting) return;
+
+                try {
+                    const currentUrl = new URL(iframe.contentWindow.location.href);
+                    const successPath = new URL('{{ route('teller.koreksi.index') }}').pathname;
+
+                    if (currentUrl.pathname === successPath) {
+                        submitting = false;
+                        bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    submitting = false;
+                }
+            });
+
+            iframe.addEventListener('load', () => {
+                try {
+                    const form = iframe.contentDocument.getElementById('formKoreksi');
+                    if (!form || form.dataset.parentSubmitBound) return;
+                    form.dataset.parentSubmitBound = 'true';
+                    form.addEventListener('submit', () => {
+                        submitting = true;
+                    });
+                } catch (error) {
+                    submitting = false;
+                }
+            });
+        })();
+    </script>
+    <style>
+        .koreksi-index-table tbody tr {
+            height: 58px;
+        }
+
+        .koreksi-index-table tbody td {
+            height: 58px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            vertical-align: middle !important;
+        }
+
+        .koreksi-index-table .koreksi-nasabah-cell {
+            min-width: 135px;
+        }
+
+        .koreksi-index-table .koreksi-nasabah-nama {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            font-weight: 600;
+        }
+
+        .koreksi-index-table .koreksi-nasabah-cell .badge {
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        .struk-koreksi-modal .modal-dialog { width: min(620px, calc(100% - 24px)); max-width: 620px; }
+        .struk-koreksi-modal .modal-content { overflow: hidden; border: 0; border-radius: 12px; box-shadow: var(--shadow-md); }
+        .struk-koreksi-modal .modal-body { height: min(620px, calc(100vh - 120px)); background: var(--page); }
+        .struk-koreksi-modal iframe { display: block; width: 100%; height: 100%; border: 0; }
+
+        .koreksi-request-modal .modal-dialog { width:min(430px, calc(100% - 20px)); max-width:430px; }
+        .koreksi-request-modal .modal-content { height:min(560px, calc(100vh - 24px)); overflow:hidden; border-radius:12px; }
+        .koreksi-request-modal .modal-body { height:100%; overflow:hidden; }
+        .koreksi-request-modal iframe { display:block; height:100%; }
+    </style>
 @endsection

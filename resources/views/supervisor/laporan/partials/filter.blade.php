@@ -1,6 +1,5 @@
-<div class="data-panel mb-3">
-    <div class="panel-body py-3 px-3">
-        <form class="row g-2 align-items-end" method="GET">
+<div class="list-toolbar list-toolbar-filter">
+    <form class="row g-2 align-items-end" method="GET">
             <div class="col-auto">
                 <label class="form-label small mb-1 fw-semibold">Dari Tanggal</label>
                 <input type="date" name="mulai" value="{{ $mulai->format('Y-m-d') }}" class="form-control form-control-sm">
@@ -42,6 +41,5 @@
                     <i class="fa-solid fa-file-pdf me-1"></i>PDF
                 </a>
             </div>
-        </form>
-    </div>
+    </form>
 </div>

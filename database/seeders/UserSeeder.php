@@ -16,6 +16,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $this->call(KonfigurasiSeeder::class);
+        $this->buatPetugas();
+
         $nasabah = [
             ['nis' => '20241001', 'nama' => 'Budi Santoso', 'kelas' => 'XI RPL 1', 'pin' => '123456'],
             ['nis' => '20241002', 'nama' => 'Ani Wijaya', 'kelas' => 'XII RPL 2', 'pin' => '654321'],
@@ -85,20 +87,6 @@ class UserSeeder extends Seeder
             return;
         }
 
-        $diajukan = now()->subHours(2);
-
-        PermintaanResetPin::create([
-            'id_nasabah' => $nasabah->get(1)->id,
-            'keterangan' => 'Nasabah lupa PIN.',
-            'status' => PermintaanResetPin::STATUS_PENDING,
-            'diajukan_oleh_role' => 'nasabah',
-            'nomor_tiket' => 'REQ-PIN-'.$diajukan->format('Ymd').'-01',
-            'diajukan_pada' => $diajukan,
-            'catatan' => 'Nasabah lupa PIN dan meminta perubahan melalui portal.',
-            'created_at' => $diajukan,
-            'updated_at' => $diajukan,
-        ]);
-
         $diproses = $nasabah->first();
         $selesai = now()->subDay();
 
@@ -150,6 +138,22 @@ class UserSeeder extends Seeder
                     ['nilai' => $tertinggi]
                 );
             });
+    }
+
+    protected function buatPetugas(): void
+    {
+        $petugas = [
+            ['username' => 'admin', 'email' => 'admin@bankmini.test', 'nama_petugas' => 'Administrator Bank', 'role' => 'admin', 'password' => 'Admin@2026'],
+            ['username' => 'supervisor', 'email' => 'supervisor@bankmini.test', 'nama_petugas' => 'Rina Puspita', 'role' => 'supervisor', 'password' => 'Super@2026'],
+            ['username' => 'teller1', 'email' => 'teller1@bankmini.test', 'nama_petugas' => 'Dedi Kurniawan', 'role' => 'teller', 'password' => 'Teller@2026'],
+        ];
+
+        foreach ($petugas as $data) {
+            User::firstOrCreate(
+                ['username' => $data['username']],
+                $data + ['status' => 'active'],
+            );
+        }
     }
 
     protected function createNasabah(array $data): void

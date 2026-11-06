@@ -4,6 +4,7 @@
 @section('page-title', 'Jadwal Petugas')
 @section('page-subtitle', 'Jadwal kerja Teller, Supervisor, Accounting, dan Customer Service')
 
+@section('list-page-class', 'list-page')
 @php
     $routeIndex = $prefix.'.jadwal.index';
     $routeCreate = $prefix.'.jadwal.create';
@@ -26,35 +27,33 @@
                     Hari-hari kerja petugas — {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
                 </div>
             </div>
-            <div class="header-actions">
-                <form class="d-flex gap-2 align-items-center" method="GET">
-                    <input type="date" name="tanggal" value="{{ request('tanggal') }}" class="form-control form-control-sm" style="width:auto">
-                    <select name="hari" class="form-select form-select-sm" style="width:auto">
-                        <option value="">Semua Hari</option>
-                        @foreach ($hariOptions as $h)
-                            <option value="{{ $h }}" @selected(request('hari') === $h)>{{ $h }}</option>
-                        @endforeach
-                    </select>
-                    <select name="status" class="form-select form-select-sm" style="width:auto">
-                        <option value="">Semua Status</option>
-                        @foreach ($statusOptions as $s)
-                            <option value="{{ $s }}" @selected(request('status') === $s)>{{ $statusFilterLabel[$s] ?? ucfirst($s) }}</option>
-                        @endforeach
-                    </select>
-                    <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
-                </form>
-                @if ($canManage)
-                    <a href="{{ route($routeCreate) }}" class="btn btn-success btn-sm">
-                        <i class="fa-solid fa-plus me-1"></i>Tambah Jadwal
-                    </a>
-                @endif
-            </div>
         </div>
 
         <div class="data-panel mb-3">
             <div class="panel-head">
                 <div class="panel-title"><span class="dot"></span>Jadwal Petugas</div>
-                <span class="status-badge blue">{{ $jadwal->total() }} terjadwal</span>
+                <div class="table-toolbar">
+                    <form class="d-flex gap-2 align-items-center flex-wrap" method="GET">
+                        <input type="date" name="tanggal" value="{{ request('tanggal') }}" class="form-control form-control-sm" style="width:auto">
+                        <select name="hari" class="form-select form-select-sm" style="width:auto">
+                            <option value="">Semua Hari</option>
+                            @foreach ($hariOptions as $h)
+                                <option value="{{ $h }}" @selected(request('hari') === $h)>{{ $h }}</option>
+                            @endforeach
+                        </select>
+                        <select name="status" class="form-select form-select-sm" style="width:auto">
+                            <option value="">Semua Status</option>
+                            @foreach ($statusOptions as $s)
+                                <option value="{{ $s }}" @selected(request('status') === $s)>{{ $statusFilterLabel[$s] ?? ucfirst($s) }}</option>
+                            @endforeach
+                        </select>
+                        <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
+                    </form>
+                    @if ($canManage)
+                        <a href="{{ route($routeCreate) }}" class="btn btn-success btn-sm"><i class="fa-solid fa-plus me-1"></i>Tambah Jadwal</a>
+                    @endif
+                    <span class="status-badge blue">{{ $jadwal->total() }} terjadwal</span>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle table-nowrap mb-0">

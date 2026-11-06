@@ -74,7 +74,7 @@ class KoreksiController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $transaksi = $request->filled('transaksi_id')
-            ? Transaksi::with('nasabah')->where('id_user', Auth::id())->find($request->input('transaksi_id'))
+            ? Transaksi::with('nasabah')->where('id_user', Auth::id())->where('status', Transaksi::STATUS_APPROVED)->find($request->input('transaksi_id'))
             : null;
 
         if ($request->filled('transaksi_id') && ! $transaksi) {
@@ -153,7 +153,7 @@ class KoreksiController extends Controller
                 UserNotification::TIPE_INFO,
                 'Koreksi Menunggu Persetujuan',
                 "Pengajuan koreksi {$perihal} oleh ".auth()->user()->nama_petugas.' menunggu persetujuan Supervisor.',
-                route('supervisor.koreksi.index'),
+                route('supervisor.pusat-verifikasi', ['tab' => 'koreksi', 'status' => 'menunggu_approval']),
             );
         }
 

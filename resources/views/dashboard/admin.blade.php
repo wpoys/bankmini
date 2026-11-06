@@ -5,26 +5,9 @@
 @section('page-subtitle', 'Panel administrasi sistem Bank Mini Sekolah')
 
 @section('content')
-    <div class="page-animate">
-        <div class="page-header">
-            <div>
-                <h1>Dashboard Administrasi</h1>
-                <div class="page-header-sub">
-                    Ringkasan master data & transaksi — {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
-                </div>
-            </div>
-            <div class="header-actions">
-                <span class="status-badge green">Sistem Aktif</span>
-                <a href="{{ route('admin.users.index', ['modal' => 'petugas']) }}" class="quick-action">
-                    <i class="fa-solid fa-user-plus"></i><span>Petugas Baru</span>
-                </a>
-                <a href="{{ route('admin.nasabah.index', ['modal' => 'nasabah']) }}" class="quick-action">
-                    <i class="fa-solid fa-user-graduate"></i><span>Nasabah Baru</span>
-                </a>
-            </div>
-        </div>
+    <div class="page-animate admin-dashboard">
 
-        <div class="row g-3 mb-3">
+        <div class="row g-3 mb-3 admin-dashboard-stats">
             <div class="col-6 col-xl-3">
                 <div class="stat-card h-100">
                     <div class="stat-top">
@@ -67,7 +50,7 @@
             </div>
         </div>
 
-        <div class="alert alert-info small py-2 d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div class="alert alert-info small py-2 d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 admin-dashboard-schedule">
             <span>
                 <i class="fa-solid fa-calendar-check me-2"></i>Jadwal hari ini:
                 <strong>{{ number_format($jadwalPetugasHariIni, 0, ',', '.') }}</strong> petugas terjadwal
@@ -77,7 +60,7 @@
             <a href="{{ route('admin.jadwal.index') }}" class="fw-semibold small">Kelola Jadwal <i class="fa-solid fa-arrow-right ms-1"></i></a>
         </div>
 
-        <div class="data-panel mb-3" id="reset-pin">
+        <div class="data-panel mb-3 admin-dashboard-pin" id="reset-pin">
             <div class="panel-head">
                 <div class="panel-title"><span class="dot" style="background:var(--orange)"></span>Persetujuan Ubah PIN Nasabah</div>
                 <div class="d-flex align-items-center gap-3">
@@ -230,7 +213,7 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
-                scales: { y: { beginAtZero: true, grid: { color: '#EEF1F7' }, ticks: { callback: v => 'Rp ' + v.toLocaleString('id-ID'), font: { size: 11 } } } },
+                scales: { y: { beginAtZero: true, grid: { color: '#EEF1F7' }, ticks: { stepSize: 10000, callback: v => 'Rp ' + v.toLocaleString('id-ID'), font: { size: 11 } } } },
             },
         });
     </script>

@@ -4,6 +4,7 @@
 @section('page-title', 'Mutasi Nasabah')
 @section('page-subtitle', 'Rincian transaksi per nasabah')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -13,8 +14,7 @@
             </div>
         </div>
 
-        <div class="data-panel mb-3">
-        <div class="panel-body py-3 px-3">
+        <div class="list-toolbar list-toolbar-filter">
             <form class="row g-2 align-items-end" method="GET">
                 <div class="col-lg-4">
                     <label class="form-label small mb-1 fw-semibold">Pilih Nasabah</label>
@@ -44,7 +44,6 @@
                 @endif
             </form>
         </div>
-    </div>
 
     @if ($nasabah)
         <div class="data-panel">

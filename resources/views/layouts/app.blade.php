@@ -28,7 +28,7 @@
     @stack('styles')
 </head>
 
-<body class="@yield('body-class', auth()->check() ? 'role-' . auth()->user()->role : '')">
+<body class="@yield('body-class', auth()->check() ? 'role-' . auth()->user()->role : '') @yield('list-page-class')">
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     @yield('auth-body')
@@ -43,7 +43,6 @@
 
         @php
             $user = auth()->user();
-            $profilUrl = route('profil');
             $notifikasiCount = $user->userNotifications()->belumDibaca()->count();
             $notifikasiTerbaru = $user->userNotifications()->latest()->take(6)->get();
         @endphp
@@ -112,10 +111,6 @@
                                     <div class="px-3 py-4 text-center text-muted small">Belum ada notifikasi</div>
                                 @endforelse
                             </div>
-                            <div class="text-center py-2 border-top bg-white">
-                                <a href="{{ route('notifikasi.index') }}"
-                                    class="small text-decoration-none fw-semibold">Lihat Semua Notifikasi</a>
-                            </div>
                         </div>
                     </div>
 
@@ -141,10 +136,9 @@
                                 </div>
                             </div>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end shadow-sm p-1 mx-2 mt-1" style="width:270px;">
-                            <div class="px-3 py-3 d-flex align-items-center gap-3 border-bottom mb-1">
-                                <div class="avatar rounded-circle flex-shrink-0"
-                                    style="width:46px;height:46px;font-size:1rem;">
+                        <div class="dropdown-menu dropdown-menu-end profile-dropdown p-0 shadow-sm">
+                            <div class="profile-dropdown-heading">
+                                <div class="avatar rounded-circle flex-shrink-0" style="width:42px;height:42px;font-size:.9rem;">
                                     @if ($user->foto)
                                         <img src="{{ asset('storage/' . $user->foto) }}" alt="Foto {{ $user->nama_petugas }}">
                                     @else
@@ -152,18 +146,19 @@
                                     @endif
                                 </div>
                                 <div class="text-truncate">
-                                    <div class="fw-bold text-truncate small">{{ $user->nama_petugas }}</div>
-                                    <div class="text-muted small text-truncate">{{ $user->email ?? '@' . $user->username }}
-                                    </div>
-                                    <span class="badge badge-soft-primary mt-1">{{ $user->role_label }}</span>
+                                    <div class="fw-bold small text-truncate">{{ $user->nama_petugas }}</div>
+                                    <div class="text-muted small text-truncate">{{ '@' . $user->username }}</div>
                                 </div>
                             </div>
-                            <a href="{{ $profilUrl }}" class="dropdown-item py-2">
-                                <i class="fa-solid fa-id-badge me-2 text-muted"></i>Lihat Profil
-                            </a>
-                            <form method="POST" action="{{ route('logout') }}">
+                            <div class="profile-dropdown-details">
+                                <div><span>Nama Lengkap</span><strong>{{ $user->nama_petugas }}</strong></div>
+                                <div><span>Username</span><strong>{{ $user->username }}</strong></div>
+                                <div><span>Email</span><strong>{{ $user->email ?? 'Belum diatur' }}</strong></div>
+                                <div><span>Role</span><strong><span class="badge badge-soft-primary">{{ $user->role_label }}</span></strong></div>
+                            </div>
+                            <form method="POST" action="{{ route('logout') }}" class="profile-dropdown-logout">
                                 @csrf
-                                <button type="submit" class="dropdown-item py-2 text-danger">
+                                <button type="submit" class="dropdown-item text-danger">
                                     <i class="fa-solid fa-right-from-bracket me-2"></i>Keluar
                                 </button>
                             </form>

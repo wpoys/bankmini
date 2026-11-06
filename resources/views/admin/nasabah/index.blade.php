@@ -4,6 +4,7 @@
 @section('page-title', 'Manajemen Nasabah')
 @section('page-subtitle', 'Kelola data rekening siswa')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -11,46 +12,39 @@
                 <h1>Daftar Nasabah</h1>
                 <div class="page-header-sub">Kelola data rekening siswa</div>
             </div>
-            <div class="header-actions">
-                <form class="d-flex gap-2 align-items-center" method="GET">
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" name="search" value="{{ request('search') }}"
-                            class="form-control form-control-sm" placeholder="Cari nama / rekening / NIS">
-                    </div>
-                    <select name="kelas" class="form-select form-select-sm" style="width:auto;">
-                        <option value="">Semua Kelas</option>
-                        @foreach (\App\Models\Nasabah::KELAS_GROUPS as $jurusan => $kelasPilihan)
-                            <optgroup label="{{ $jurusan }}">
-                                @foreach ($kelasPilihan as $kelas)
-                                    <option value="{{ $kelas }}" @selected(request('kelas') === $kelas)>{{ $kelas }}</option>
-                                @endforeach
-                            </optgroup>
-                        @endforeach
-                    </select>
-                    <select name="arsip" class="form-select form-select-sm" style="width:auto;">
-                        <option value="">Semua Status</option>
-                        <option value="aktif" @selected(request('arsip') === 'aktif')>Aktif</option>
-                        <option value="arsip" @selected(request('arsip') === 'arsip')>Arsip (Alumni)</option>
-                    </select>
-                    <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
-                </form>
-                <a href="{{ route('admin.nasabah.index', ['modal' => 'nasabah']) }}" class="btn btn-success btn-sm">
-                    <i class="fa-solid fa-plus me-1"></i>Tambah Nasabah</a>
-                <a href="{{ route('admin.nasabah.import') }}" class="btn btn-outline-primary btn-sm"><i
-                        class="fa-solid fa-file-import me-1"></i>Import CSV</a>
-            </div>
         </div>
 
         <div class="data-panel">
             <div class="panel-head">
                 <div class="panel-title"><span class="dot"></span>Daftar nasabah</div>
                 <div class="table-toolbar">
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" class="form-control form-control-sm" data-table-filter
-                            placeholder="Filter di tabel...">
-                    </div>
+                    <form class="d-flex gap-2 align-items-center flex-wrap" method="GET">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                class="form-control form-control-sm" placeholder="Cari nama / rekening / NIS">
+                        </div>
+                        <select name="kelas" class="form-select form-select-sm" style="width:auto;">
+                            <option value="">Semua Kelas</option>
+                            @foreach (\App\Models\Nasabah::KELAS_GROUPS as $jurusan => $kelasPilihan)
+                                <optgroup label="{{ $jurusan }}">
+                                    @foreach ($kelasPilihan as $kelas)
+                                        <option value="{{ $kelas }}" @selected(request('kelas') === $kelas)>{{ $kelas }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
+                        <select name="arsip" class="form-select form-select-sm" style="width:auto;">
+                            <option value="">Semua Status</option>
+                            <option value="aktif" @selected(request('arsip') === 'aktif')>Aktif</option>
+                            <option value="arsip" @selected(request('arsip') === 'arsip')>Arsip (Alumni)</option>
+                        </select>
+                        <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
+                    </form>
+                    <a href="{{ route('admin.nasabah.index', ['modal' => 'nasabah']) }}" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-plus me-1"></i>Tambah Nasabah</a>
+                    <a href="{{ route('admin.nasabah.import') }}" class="btn btn-outline-primary btn-sm"><i
+                            class="fa-solid fa-file-import me-1"></i>Import CSV</a>
                 </div>
             </div>
             <div class="table-responsive">

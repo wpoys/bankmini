@@ -2,15 +2,16 @@
 
 @section('title', 'Verifikasi Transaksi Harian')
 @section('page-title', 'Verifikasi Transaksi Harian')
-@section('page-subtitle', 'Transaksi dikelompokkan per tanggal. Verifikasi satu kali per hari, tidak dapat diulang.')
+@section('page-subtitle', 'Tinjau transaksi harian, terima verifikasi, atau tolak dengan catatan untuk ditindaklanjuti.')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
             <div>
                 <h1>Verifikasi Transaksi per Hari</h1>
                 <div class="page-header-sub">
-                    Pilih tanggal untuk melihat transaksi yang belum diverifikasi beserta ringkasannya.
+                    Pilih tanggal untuk meninjau ringkasan dan seluruh transaksi pada hari tersebut.
                 </div>
             </div>
             <div class="header-actions">
@@ -20,10 +21,17 @@
             </div>
         </div>
 
-        <div class="data-panel mb-3">
-            <div class="panel-head">
-                <div class="panel-title"><span class="dot"></span>Daftar Tanggal Transaksi</div>
+        @if (! $hubContext)
+            <div class="data-panel mb-3">
+                <div class="panel-head">
+                    <div class="panel-title"><span class="dot"></span>Daftar Tanggal Transaksi</div>
                 <form method="GET" class="d-flex gap-2">
+                    @if ($hubContext)
+                        <input type="hidden" name="hub" value="1">
+                        <input type="hidden" name="tab" value="transaksi-harian">
+                        <input type="hidden" name="status" value="{{ $hubContext['status'] }}">
+                        <input type="hidden" name="cari" value="{{ $hubContext['cari'] }}">
+                    @endif
                     <input type="date" name="tanggal" class="form-control form-control-sm"
                            value="{{ request('tanggal') }}" onchange="this.form.submit()">
                     <button class="btn btn-sm btn-primary"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -48,7 +56,8 @@
                             @php
                                 $r = $row['ringkasan'];
                                 $v = $row['sudah'];
-                                $sudah = $v && $v->sudah_diverifikasi;
+                                $sudah = $v?->sudah_diverifikasi ?? false;
+                                $ditolak = $v?->ditolak ?? false;
                             @endphp
                             <tr class="{{ request('tanggal') === $row['tanggal'] ? 'table-active' : '' }}">
                                 <td class="fw-semibold small">
@@ -69,18 +78,21 @@
                                 </td>
                                 <td>
                                     @if ($sudah)
-                                        <span class="status-badge green">Selesai</span>
+                                        <span class="status-badge green">Diterima</span>
                                         <div class="small text-muted">
                                             {{ $v->verifikasi_at?->format('d/m/Y H:i') }} · {{ $v->verifikator?->nama_petugas ?? '-' }}
                                         </div>
+                                    @elseif ($ditolak)
+                                        <span class="status-badge red">Ditolak</span>
+                                        <div class="small text-muted">Perlu ditinjau ulang</div>
                                     @else
-                                        <span class="status-badge orange">Belum Diverifikasi</span>
+                                        <span class="status-badge orange">Menunggu</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('verifikasi.index', ['tanggal' => $row['tanggal']]) }}"
-                                       class="btn btn-sm {{ $sudah ? 'btn-outline-secondary' : 'btn-outline-primary' }}">
-                                        {{ $sudah ? 'Lihat Riwayat' : 'Verifikasi' }}
+                                    <a href="{{ route('verifikasi.index', array_merge(['tanggal' => $row['tanggal']], $hubContext ? ['hub' => 1, 'tab' => 'transaksi-harian', 'status' => $hubContext['status'], 'cari' => $hubContext['cari']] : [])) }}"
+                                       class="btn btn-sm {{ $sudah ? 'btn-outline-secondary' : ($ditolak ? 'btn-outline-danger' : 'btn-outline-primary') }}">
+                                        {{ $sudah ? 'Lihat Riwayat' : ($ditolak ? 'Tinjau Ulang' : 'Verifikasi') }}
                                     </a>
                                 </td>
                             </tr>
@@ -99,6 +111,7 @@
                 </table>
             </div>
         </div>
+        @endif
 
         @if ($terpilih)
             <div class="data-panel">
@@ -107,12 +120,12 @@
                         <span class="dot" style="background:var(--purple)"></span>
                         {{ $terpilih->translatedFormat('l, d F Y') }}
                     </div>
-                    @if ($verifikasi && $verifikasi->sudah_diverifikasi)
-                        <span class="status-badge green">
-                            <i class="fa-solid fa-circle-check me-1"></i>Sudah Diverifikasi
-                        </span>
+                    @if ($verifikasi?->sudah_diverifikasi)
+                        <span class="status-badge green"><i class="fa-solid fa-circle-check me-1"></i>Diterima · Sudah Diverifikasi</span>
+                    @elseif ($verifikasi?->ditolak)
+                        <span class="status-badge red"><i class="fa-solid fa-circle-xmark me-1"></i>Ditolak</span>
                     @else
-                        <span class="status-badge orange">Belum Diverifikasi</span>
+                        <span class="status-badge orange">Menunggu</span>
                     @endif
                 </div>
 
@@ -150,36 +163,83 @@
                         </div>
                     @endif
 
-                    @if ($verifikasi && $verifikasi->sudah_diverifikasi)
+                    @if ($verifikasi?->sudah_diverifikasi)
                         <div class="alert alert-success small py-2">
                             <i class="fa-solid fa-circle-check me-1"></i>
-                            Verifikasi tanggal <strong>{{ $verifikasi->tanggal->format('d/m/Y') }}</strong>
-                            telah selesai pada <strong>{{ $verifikasi->verifikasi_at->format('d/m/Y H:i:s') }}</strong>
+                            Tanggal ini diterima pada <strong>{{ $verifikasi->verifikasi_at?->format('d/m/Y H:i:s') }}</strong>
                             oleh <strong>{{ $verifikasi->verifikator?->nama_petugas ?? '-' }}</strong>.
                             Verifikasi ulang tidak diizinkan. Data di bawah bersifat riwayat.
                         </div>
+                        @if ($verifikasi->catatan)
+                            <div class="small text-muted mb-3">Catatan penolakan sebelumnya: {{ $verifikasi->catatan }}</div>
+                        @endif
                     @else
-                        <form method="POST" action="{{ route('verifikasi.proses', $terpilih->toDateString()) }}"
-                              class="row g-2 align-items-end mb-3"
-                              data-confirm="Verifikasi semua transaksi tanggal {{ $terpilih->format('d/m/Y') }}? Tindakan ini tidak dapat dibatalkan."
-                              data-confirm-title="Verifikasi Transaksi Harian">
-                            @csrf
-                            <div class="col-md-8">
-                                <label class="form-label small" for="catatanVerifikasi">Catatan (opsional)</label>
-                                <input type="text" name="catatan" id="catatanVerifikasi" class="form-control form-control-sm"
-                                       maxlength="500" placeholder="Contoh: Rekap sesuai dengan buku kas">
+                        @if ($verifikasi?->ditolak)
+                            <div class="alert alert-danger small py-2">
+                                <i class="fa-solid fa-circle-xmark me-1"></i>
+                                Ditolak pada <strong>{{ $verifikasi->verifikasi_at?->format('d/m/Y H:i:s') }}</strong>
+                                oleh <strong>{{ $verifikasi->verifikator?->nama_petugas ?? '-' }}</strong>.
+                                <div class="mt-1"><strong>Catatan:</strong> {{ $verifikasi->catatan }}</div>
+                                <div class="mt-1">Setelah tindak lanjut teller, tinjau kembali transaksi lalu pilih Terima.</div>
                             </div>
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-success w-100 btn-submit-loading">
-                                    <i class="fa-solid fa-circle-check me-1"></i>Verifikasi Tanggal Ini
+                        @endif
+
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <form method="POST" action="{{ route('verifikasi.proses', $terpilih->toDateString()) }}"
+                                  data-confirm="Terima verifikasi seluruh transaksi tanggal {{ $terpilih->format('d/m/Y') }}?"
+                                  data-confirm-title="Terima Verifikasi">
+                                @csrf
+                                <input type="hidden" name="keputusan" value="diterima">
+                                @if ($hubContext)
+                                    <input type="hidden" name="hub" value="1">
+                                    <input type="hidden" name="tab" value="transaksi-harian">
+                                    <input type="hidden" name="status" value="{{ $hubContext['status'] }}">
+                                    <input type="hidden" name="cari" value="{{ $hubContext['cari'] }}">
+                                @endif
+                                <button type="submit" class="btn btn-success btn-submit-loading">
+                                    <i class="fa-solid fa-circle-check me-1"></i>Terima
                                 </button>
+                            </form>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalTolakVerifikasi">
+                                <i class="fa-solid fa-circle-xmark me-1"></i>Tolak
+                            </button>
+                        </div>
+
+                        <div class="modal fade" id="modalTolakVerifikasi" tabindex="-1" aria-labelledby="modalTolakVerifikasiLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <form method="POST" action="{{ route('verifikasi.proses', $terpilih->toDateString()) }}">
+                                        @csrf
+                                        <input type="hidden" name="keputusan" value="ditolak">
+                                        @if ($hubContext)
+                                            <input type="hidden" name="hub" value="1">
+                                            <input type="hidden" name="tab" value="transaksi-harian">
+                                            <input type="hidden" name="status" value="{{ $hubContext['status'] }}">
+                                            <input type="hidden" name="cari" value="{{ $hubContext['cari'] }}">
+                                        @endif
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalTolakVerifikasiLabel">Tolak Verifikasi</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="small text-muted">Catatan penolakan akan dikirimkan kepada teller terkait dan tersimpan di riwayat.</p>
+                                            <label for="catatanPenolakan" class="form-label">Catatan penolakan <span class="text-danger">*</span></label>
+                                            <textarea name="catatan" id="catatanPenolakan" class="form-control" rows="4" maxlength="500" required placeholder="Jelaskan masalah yang perlu ditindaklanjuti">{{ old('catatan', $verifikasi?->ditolak ? $verifikasi->catatan : '') }}</textarea>
+                                            @error('catatan')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" class="btn btn-danger btn-submit-loading">Kirim Penolakan</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                        </form>
+                        </div>
                     @endif
 
                     <div class="small text-muted mb-2">
                         <i class="fa-solid fa-circle-info me-1"></i>
-                        {{ $verifikasi && $verifikasi->sudah_diverifikasi ? 'Riwayat transaksi tanggal ini:' : 'Transaksi yang belum diverifikasi:' }}
+                        {{ $verifikasi?->sudah_diverifikasi ? 'Riwayat transaksi tanggal ini:' : 'Transaksi yang ditinjau:' }}
                     </div>
 
                     <div class="table-responsive">
@@ -228,3 +288,16 @@
         @endif
     </div>
 @endsection
+
+@push('scripts')
+    @if ($errors->has('catatan'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const modalElement = document.getElementById('modalTolakVerifikasi');
+                if (modalElement && window.bootstrap?.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(modalElement).show();
+                }
+            });
+        </script>
+    @endif
+@endpush

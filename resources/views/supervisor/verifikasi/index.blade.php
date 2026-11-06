@@ -4,6 +4,7 @@
 @section('page-title', 'Verifikasi Laporan Harian')
 @section('page-subtitle', 'Periksa dan verifikasi laporan harian teller')
 
+@section('list-page-class', 'list-page')
 @section('content')
     <div class="page-animate">
         <div class="page-header">
@@ -11,24 +12,24 @@
                 <h1>Verifikasi Laporan Harian</h1>
                 <div class="page-header-sub">Periksa laporan harian yang dikirim teller</div>
             </div>
-            <div class="header-actions">
-                <form method="GET" class="d-flex gap-2">
-                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="all" @selected(request('status') === 'all' || !request('status'))>Semua Status</option>
-                        <option value="draft" @selected(request('status') === 'draft')>Draft</option>
-                        <option value="menunggu_approval" @selected(request('status') === 'menunggu_approval')>Menunggu Approval</option>
-                        <option value="pending" @selected(request('status') === 'pending')>Ditahan (Pending)</option>
-                        <option value="disetujui" @selected(request('status') === 'disetujui')>Disetujui</option>
-                        <option value="ditolak" @selected(request('status') === 'ditolak')>Ditolak</option>
-                    </select>
-                    <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
-                </form>
-            </div>
         </div>
 
         <div class="data-panel">
             <div class="panel-head">
                 <div class="panel-title"><span class="dot"></span>Daftar Laporan Teller</div>
+                <div class="table-toolbar">
+                    <form method="GET" class="d-flex gap-2 align-items-center">
+                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="all" @selected(request('status') === 'all' || !request('status'))>Semua Status</option>
+                            <option value="draft" @selected(request('status') === 'draft')>Draft</option>
+                            <option value="menunggu_approval" @selected(request('status') === 'menunggu_approval')>Menunggu Approval</option>
+                            <option value="pending" @selected(request('status') === 'pending')>Ditahan (Pending)</option>
+                            <option value="disetujui" @selected(request('status') === 'disetujui')>Disetujui</option>
+                            <option value="ditolak" @selected(request('status') === 'ditolak')>Ditolak</option>
+                        </select>
+                        <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
+                    </form>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle table-nowrap mb-0">
