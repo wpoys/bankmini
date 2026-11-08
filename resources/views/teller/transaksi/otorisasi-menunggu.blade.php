@@ -8,21 +8,44 @@
     <section class="data-panel mx-auto" style="max-width:780px;">
         <div class="panel-body p-4 p-md-5 text-center">
             <div class="mb-3 text-primary" id="otorisasiIcon"><i class="fa-solid fa-mobile-screen-button fa-3x"></i></div>
-            <span class="badge text-bg-warning mb-3" id="otorisasiStatus"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Menunggu PIN Nasabah</span>
+            <span class="badge text-bg-warning mb-3" id="otorisasiStatus"><span
+                    class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> Menunggu PIN Nasabah</span>
             <h1 class="h4 fw-bold">Konfirmasi transaksi di aplikasi nasabah</h1>
-            <p class="text-muted">Nasabah harus menyetujui dengan PIN dalam waktu 5 menit. Halaman ini akan diperbarui otomatis.</p>
+            <p class="text-muted">Nasabah harus menyetujui dengan PIN dalam waktu 5 menit. Halaman ini akan diperbarui
+                otomatis.</p>
             <div class="row g-3 my-4 text-start">
-                <div class="col-sm-6"><div class="p-3 rounded border h-100"><small class="text-muted d-block">Nasabah</small><strong>{{ $transaksi->nasabah?->nama_siswa ?? '-' }}</strong></div></div>
-                <div class="col-sm-6"><div class="p-3 rounded border h-100"><small class="text-muted d-block">Rekening</small><strong>{{ $transaksi->nasabah?->no_rekening ?? '-' }}</strong></div></div>
-                <div class="col-sm-6"><div class="p-3 rounded border h-100"><small class="text-muted d-block">Jenis transaksi</small><strong>{{ $transaksi->jenis_label }}</strong></div></div>
-                <div class="col-sm-6"><div class="p-3 rounded border h-100"><small class="text-muted d-block">Nominal</small><strong>{{ $transaksi->nominal_rupiah }}</strong></div></div>
-                <div class="col-12"><div class="p-3 rounded border"><small class="text-muted d-block">Nomor referensi</small><strong>{{ $transaksi->no_struk }}</strong></div></div>
+                <div class="col-sm-6">
+                    <div class="p-3 rounded border h-100"><small
+                            class="text-muted d-block">Nasabah</small><strong>{{ $transaksi->nasabah?->nama_siswa ?? '-' }}</strong>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 rounded border h-100"><small
+                            class="text-muted d-block">Rekening</small><strong>{{ $transaksi->nasabah?->no_rekening ?? '-' }}</strong>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 rounded border h-100"><small class="text-muted d-block">Jenis
+                            transaksi</small><strong>{{ $transaksi->jenis_label }}</strong></div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 rounded border h-100"><small
+                            class="text-muted d-block">Nominal</small><strong>{{ $transaksi->nominal_rupiah }}</strong>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="p-3 rounded border"><small class="text-muted d-block">Nomor
+                            referensi</small><strong>{{ $transaksi->no_struk }}</strong></div>
+                </div>
             </div>
-            <div class="text-muted small mb-4" id="otorisasiCountdown" data-expiry="{{ $transaksi->kadaluarsa_pada?->toISOString() }}"></div>
+            <div class="text-muted small mb-4" id="otorisasiCountdown"
+                data-expiry="{{ $transaksi->kadaluarsa_pada?->toISOString() }}"></div>
             <div class="alert d-none" id="otorisasiResult" role="status"></div>
             <div class="d-flex justify-content-center gap-2">
-                <a href="{{ route('teller.dashboard') }}" class="btn btn-outline-secondary" id="otorisasiBack">Kembali ke Transaksi</a>
-                <a href="{{ route('teller.struk', $transaksi) }}" class="btn btn-success d-none" id="otorisasiReceipt">Lihat Struk</a>
+                <a href="{{ route('teller.dashboard') }}" class="btn btn-outline-secondary" id="otorisasiBack">Kembali ke
+                    Transaksi</a>
+                <a href="{{ route('teller.struk', $transaksi) }}" class="btn btn-success d-none" id="otorisasiReceipt">Lihat
+                    Struk</a>
             </div>
         </div>
     </section>

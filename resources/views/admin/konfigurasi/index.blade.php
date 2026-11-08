@@ -1,36 +1,71 @@
 @extends('layouts.app')
 
-@section('title', 'Konfigurasi Sistem')
-@section('page-title', 'Konfigurasi Sistem')
-@section('page-subtitle', 'Atur parameter operasional bank mini (diterapkan langsung ke seluruh modul)')
+@section('title', 'Pengaturan Sistem & Database')
+@section('page-title', 'Pengaturan Sistem & Database')
+@section('page-subtitle', 'Kelola parameter operasional bank mini dan salinan cadangan data terpusat')
 
 @section('content')
-    <div class="page-animate">
-        <div class="page-header">
-            <div>
-                <h1>Konfigurasi Sistem</h1>
-                <div class="page-header-sub">Atur parameter operasional bank mini (diterapkan langsung ke seluruh modul)</div>
+    <div class="page-animate settings-backup-page">
+        @if (session('success'))
+            <div class="alert alert-success small"><i class="fa-solid fa-circle-check me-1"></i>{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger small"><i class="fa-solid fa-circle-exclamation me-1"></i>{{ session('error') }}</div>
+        @endif
+        @if ($errors->any())
+            <div class="alert alert-danger small">
+                <ul class="mb-0 ps-3">
+                    @foreach ($errors->all() as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="data-panel settings-backup-panel mb-3">
+            <div class="panel-head">
+                <div>
+                    <div class="panel-title"><span class="dot"></span>Daftar Backup Database <span class="badge badge-soft-secondary ms-2">{{ count($files) }} Arsip</span></div>
+                    <div class="small text-muted mt-1"><i class="fa-solid fa-database me-1"></i>Tersimpan di <code>storage/app/backups</code> &nbsp;|&nbsp; Skedul cron: <code>php artisan bankmini:backup</code></div>
+                </div>
+                <form action="{{ route('admin.backup.store') }}" method="POST">
+                    @csrf
+                    <button class="btn btn-success btn-sm"><i class="fa-solid fa-shield-halved me-1"></i>Buat Backup Sekarang</button>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle table-nowrap mb-0">
+                    <thead><tr><th>Nama File</th><th class="text-end">Ukuran</th><th class="text-end">Dibuat</th><th class="text-end">Integritas</th><th class="text-end">Aksi</th></tr></thead>
+                    <tbody>
+                        @forelse ($files as $file)
+                            <tr>
+                                <td class="fw-semibold small"><i class="fa-solid fa-file-shield me-1 text-success"></i>{{ $file->getFilename() }}</td>
+                                <td class="num small text-end">{{ number_format($file->getSize() / 1024, 1) }} KB</td>
+                                <td class="small text-end">{{ \Carbon\Carbon::createFromTimestamp($file->getMTime())->format('d/m/Y H:i') }}</td>
+                                <td class="text-end"><span class="status-badge green">Tersedia</span></td>
+                                <td class="text-end text-nowrap">
+                                    <a href="{{ route('admin.backup.download', $file->getFilename()) }}" class="btn btn-sm btn-outline-primary" title="Unduh"><i class="fa-solid fa-download"></i></a>
+                                    <form action="{{ route('admin.backup.destroy', $file->getFilename()) }}" method="POST" class="d-inline" data-confirm="Hapus backup ini?" data-confirm-title="Hapus Backup">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-outline-danger" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5"><div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-server"></i></div><div class="empty-title">Belum ada backup</div><div class="empty-desc">Buat backup pertama untuk mengamankan data.</div></div></td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
 
+        <div class="settings-section-heading">
+            <div><strong>Parameter &amp; Kebijakan Operasional</strong><span>Atur parameter operasional bank mini (diterapkan langsung ke seluruh modul)</span></div>
+            <span class="badge badge-soft-success">Mode Sinkronisasi Aktif</span>
+        </div>
         <div class="row justify-content-center">
-            <div class="col-lg-8">
-                @if (session('success'))
-                    <div class="alert alert-success small"><i class="fa-solid fa-circle-check me-1"></i>{{ session('success') }}</div>
-                @endif
-                @if (session('error'))
-                    <div class="alert alert-danger small"><i class="fa-solid fa-circle-exclamation me-1"></i>{{ session('error') }}</div>
-                @endif
-                @if ($errors->any())
-                    <div class="alert alert-danger small">
-                        <ul class="mb-0 ps-3">
-                            @foreach ($errors->all() as $err)
-                                <li>{{ $err }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
+            <div class="col-lg-12">
                 <form method="POST" action="{{ route('admin.konfigurasi.update') }}">
                     @csrf
                     @method('PUT')
@@ -90,30 +125,6 @@
                                 @foreach (\App\Models\Konfigurasi::kodeJurusan() as $kode)
                                     <span class="badge badge-soft-primary">{{ $kode }}</span>
                                 @endforeach
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="data-panel mb-3">
-                        <div class="panel-head">
-                            <div class="panel-title"><span class="dot" style="background:var(--red)"></span>Keamanan Koreksi</div>
-                        </div>
-                        <div class="panel-body p-3">
-                            <div class="mb-3 mb-0">
-                                <label class="form-label fw-semibold">Kode Sandi Persetujuan Koreksi</label>
-                                <input type="password" name="kode_sandi_koreksi" class="form-control" autocomplete="new-password"
-                                    minlength="4" maxlength="64" placeholder="Masukkan kode sandi baru...">
-                                <div class="form-text">
-                                    Diperlukan Supervisor/Accounting saat menyetujui koreksi transaksi.
-                                    Disimpan sebagai <strong>hash</strong> (tidak pernah plaintext).
-                                    @if ($kodeSandiTersetel)
-                                        <span class="badge badge-soft-success ms-1">Sudah disetel</span>
-                                        Kosongkan kolom ini untuk mempertahankan kode sandi saat ini.
-                                    @else
-                                        <span class="badge badge-soft-warning ms-1">Belum disetel</span>
-                                        Saat belum disetel, persetujuan koreksi belum memerlukan kode sandi.
-                                    @endif
-                                </div>
                             </div>
                         </div>
                     </div>

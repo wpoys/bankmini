@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
-use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BackupController extends Controller
@@ -16,18 +15,6 @@ class BackupController extends Controller
     public function __construct()
     {
         $this->dir = storage_path('app/backups');
-    }
-
-    public function index(): View
-    {
-        $files = File::exists($this->dir)
-            ? collect(File::files($this->dir))
-                ->filter(fn ($f) => preg_match('/\.(sql|sqlite)$/', $f->getFilename()) === 1)
-                ->sortByDesc(fn ($f) => $f->getFilename())
-                ->all()
-            : [];
-
-        return view('admin.backup.index', compact('files'));
     }
 
     public function store(): RedirectResponse

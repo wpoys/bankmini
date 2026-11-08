@@ -86,7 +86,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
 
         Route::post('nasabah/permintaan-reset/{permintaan}/proses', [AdminNasabahController::class, 'prosesPermintaanResetPin'])->name('nasabah.reset-pin.proses');
 
-        Route::get('backup', [AdminBackupController::class, 'index'])->name('backup.index');
+        Route::get('backup', fn () => redirect()->route('admin.konfigurasi.index'))->name('backup.index');
         Route::post('backup', [AdminBackupController::class, 'store'])->name('backup.store');
         Route::get('backup/{file}/download', [AdminBackupController::class, 'download'])->name('backup.download');
         Route::delete('backup/{file}', [AdminBackupController::class, 'destroy'])->name('backup.destroy');

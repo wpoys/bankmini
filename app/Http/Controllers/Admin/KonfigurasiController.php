@@ -7,7 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Konfigurasi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 
 class KonfigurasiController extends Controller
@@ -21,10 +21,15 @@ class KonfigurasiController extends Controller
                 'value' => Konfigurasi::nilai($key, ''),
             ];
         })->values()->all();
+        $backupDir = storage_path('app/backups');
+        $files = File::exists($backupDir)
+            ? collect(File::files($backupDir))
+                ->filter(fn ($file) => preg_match('/\.(sql|sqlite)$/', $file->getFilename()) === 1)
+                ->sortByDesc(fn ($file) => $file->getFilename())
+                ->all()
+            : [];
 
-        $kodeSandiTersetel = Konfigurasi::kodeSandiKoreksiTersetel();
-
-        return view('admin.konfigurasi.index', compact('items', 'kodeSandiTersetel'));
+        return view('admin.konfigurasi.index', compact('items', 'files'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -34,14 +39,12 @@ class KonfigurasiController extends Controller
             Konfigurasi::BATAS_PENARIKAN_BESAR => ['required', 'integer', 'min:0'],
             Konfigurasi::KAS_AWAL_HARIAN => ['required', 'integer', 'min:0'],
             Konfigurasi::KODE_JURUSAN => ['required', 'string', 'max:500'],
-            Konfigurasi::KODE_SANDI_KOREKSI => ['nullable', 'string', 'min:4', 'max:64'],
         ], [
             Konfigurasi::SALDO_MINIMUM.'.required' => 'Saldo minimum wajib diisi.',
             Konfigurasi::SALDO_MINIMUM.'.integer' => 'Saldo minimum harus berupa angka.',
             Konfigurasi::BATAS_PENARIKAN_BESAR.'.required' => 'Batas penarikan besar wajib diisi.',
             Konfigurasi::KAS_AWAL_HARIAN.'.required' => 'Kas awal harian wajib diisi.',
             Konfigurasi::KODE_JURUSAN.'.required' => 'Daftar kode jurusan wajib diisi.',
-            Konfigurasi::KODE_SANDI_KOREKSI.'.min' => 'Kode sandi koreksi minimal 4 karakter.',
         ]);
 
         $kodeRaw = strtoupper(trim($validated[Konfigurasi::KODE_JURUSAN]));
@@ -60,24 +63,10 @@ class KonfigurasiController extends Controller
             }
         }
 
-        $kodeSandiDiubah = false;
-        $kodeSandiInput = trim((string) ($validated[Konfigurasi::KODE_SANDI_KOREKSI] ?? ''));
-
-        if ($kodeSandiInput !== '') {
-            Konfigurasi::set(
-                Konfigurasi::KODE_SANDI_KOREKSI,
-                Hash::make($kodeSandiInput),
-                'Kode sandi persetujuan koreksi transaksi (disimpan ter-hash)',
-                auth()->id(),
-            );
-            $kodeSandiDiubah = true;
-        }
-
         ActivityLog::catat(
             auth()->id(),
             'ubah_konfigurasi',
             'Konfigurasi sistem (saldo minimum, batas penarikan besar, kas awal harian, kode jurusan) diperbarui.'
-            .($kodeSandiDiubah ? ' Kode sandi persetujuan koreksi diperbarui.' : '')
         );
 
         return redirect()->route('admin.konfigurasi.index')

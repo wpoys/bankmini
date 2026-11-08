@@ -65,7 +65,6 @@
 
                 <div class="n-auth-divider"></div>
 
-                <p class="n-auth-security">Enkripsi 256-Bit SSL • Sistem Sertifikasi LSP Perbankan</p>
                 <p class="n-auth-meta">Setiap aktivitas login tercatat otomatis dalam audit log sistem SMKN 1 Bantul.</p>
             </section>
         </div>

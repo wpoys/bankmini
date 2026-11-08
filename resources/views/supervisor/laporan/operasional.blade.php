@@ -9,13 +9,6 @@
         $filterParams = request()->except('format');
     @endphp
     <div class="page-animate operational-report-page">
-        <div class="operational-report-header no-print">
-            <div>
-                <h1>Laporan &amp; Akuntansi</h1>
-                <p>Ringkasan operasional bank berdasarkan periode dan teller</p>
-            </div>
-        </div>
-
         @if ($errors->any())
             <div class="alert alert-danger no-print">{{ $errors->first() }}</div>
         @endif

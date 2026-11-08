@@ -3,26 +3,6 @@
     $__role = $__user->role;
     $__dashboardRoute = $__role . '.dashboard';
 
-    $__active = request()->route() ? request()->route()->getName() : '';
-
-    $__laporanAktif = false;
-    if ($__role === 'teller') {
-        $__laporanAktif = request()->routeIs('teller.laporan.index') || request()->routeIs('teller.koreksi.*');
-    } elseif ($__role === 'supervisor') {
-        $__laporanAktif = request()->routeIs(
-            'supervisor.laporan.laporan-harian',
-            'supervisor.laporan.mutasi-nasabah',
-            'supervisor.laporan.saldo-produk',
-            'supervisor.laporan.laporan-tahunan',
-        );
-    } elseif ($__role === 'admin') {
-        $__laporanAktif = request()->routeIs(
-            'supervisor.jurnal',
-            'supervisor.laporan.*',
-            'supervisor.verifikasi.*',
-            'supervisor.audit',
-        );
-    }
 @endphp
 <aside class="sidebar" id="appSidebar" aria-label="Navigasi utama">
 
@@ -65,11 +45,9 @@
                 href="{{ route('supervisor.jurnal') }}" title="Buku Jurnal">
                 <i class="fa-solid fa-scale-balanced"></i><span class="nav-label">Buku Jurnal</span>
             </a>
-
-            <div class="nav-section">Laporan &amp; Akuntansi</div>
             <a class="nav-link {{ request()->routeIs('supervisor.laporan.operasional') ? 'active' : '' }}"
-                href="{{ route('supervisor.laporan.operasional') }}" title="Laporan &amp; Akuntansi">
-                <i class="fa-solid fa-chart-column"></i><span class="nav-label">Laporan &amp; Akuntansi</span>
+                href="{{ route('supervisor.laporan.operasional') }}" title="Laporan Operasional">
+                <i class="fa-solid fa-chart-column"></i><span class="nav-label">Laporan Operasional</span>
             </a>
 
             <div class="nav-section">Pengawasan</div>
@@ -102,36 +80,24 @@
                 <i class="fa-solid fa-calendar-check"></i><span class="nav-label">Jadwal Petugas</span>
             </a>
 
-            <button type="button" class="nav-link nav-dropdown-toggle {{ $__laporanAktif ? 'active' : '' }}"
-                data-bs-toggle="collapse" data-bs-target="#navLaporanKeuangan" aria-controls="navLaporanKeuangan"
-                aria-expanded="{{ $__laporanAktif ? 'true' : 'false' }}" title="Laporan Keuangan &amp; Jurnal (Read-Only)">
-                <i class="fa-solid fa-scale-balanced"></i>
-                <span class="nav-label">Laporan Keuangan &amp; Jurnal</span>
-                <i class="fa-solid fa-chevron-down nav-arrow" aria-hidden="true"></i>
-            </button>
-            <div class="collapse submenu {{ $__laporanAktif ? 'show' : '' }}" id="navLaporanKeuangan">
-                <a class="nav-link {{ request()->routeIs('supervisor.jurnal') ? 'active' : '' }}"
-                    href="{{ route('supervisor.jurnal') }}" title="Buku Jurnal">
-                    <i class="fa-solid fa-file-lines"></i><span class="nav-label">Buku Jurnal</span>
-                </a>
-                <a class="nav-link {{ request()->routeIs('supervisor.verifikasi.*') ? 'active' : '' }}"
-                    href="{{ route('supervisor.verifikasi.index') }}" title="Verifikasi Laporan Kas">
-                    <i class="fa-solid fa-clipboard-check"></i><span class="nav-label">Verifikasi Laporan Kas</span>
-                </a>
-                <a class="nav-link {{ request()->routeIs('supervisor.audit') ? 'active' : '' }}"
-                    href="{{ route('supervisor.audit') }}" title="Audit Trail">
-                    <i class="fa-solid fa-list-check"></i><span class="nav-label">Audit Trail</span>
-                </a>
-            </div>
+            <div class="nav-section">Laporan &amp; Pengawasan</div>
+            <a class="nav-link {{ request()->routeIs('supervisor.jurnal') ? 'active' : '' }}"
+                href="{{ route('supervisor.jurnal') }}" title="Buku Jurnal">
+                <i class="fa-solid fa-file-lines"></i><span class="nav-label">Buku Jurnal</span>
+            </a>
+            <a class="nav-link {{ request()->routeIs('supervisor.verifikasi.*') ? 'active' : '' }}"
+                href="{{ route('supervisor.verifikasi.index') }}" title="Verifikasi Laporan Kas">
+                <i class="fa-solid fa-clipboard-check"></i><span class="nav-label">Verifikasi Laporan Kas</span>
+            </a>
+            <a class="nav-link {{ request()->routeIs('supervisor.audit') ? 'active' : '' }}"
+                href="{{ route('supervisor.audit') }}" title="Audit Trail">
+                <i class="fa-solid fa-list-check"></i><span class="nav-label">Audit Trail</span>
+            </a>
 
             <div class="nav-section">Sistem</div>
-            <a class="nav-link {{ request()->routeIs('admin.konfigurasi.*') ? 'active' : '' }}"
-                href="{{ route('admin.konfigurasi.index') }}" title="Konfigurasi">
-                <i class="fa-solid fa-gear"></i><span class="nav-label">Konfigurasi</span>
-            </a>
-            <a class="nav-link {{ request()->routeIs('admin.backup.*') ? 'active' : '' }}"
-                href="{{ route('admin.backup.index') }}" title="Backup Database">
-                <i class="fa-solid fa-server"></i><span class="nav-label">Backup Database</span>
+            <a class="nav-link {{ request()->routeIs('admin.konfigurasi.*', 'admin.backup.*') ? 'active' : '' }}"
+                href="{{ route('admin.konfigurasi.index') }}" title="Pengaturan &amp; Backup">
+                <i class="fa-solid fa-gear"></i><span class="nav-label">Pengaturan &amp; Backup</span>
             </a>
 
         @elseif ($__role === 'teller')

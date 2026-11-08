@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Backup Database')
-@section('page-title', 'Backup Database')
-@section('page-subtitle', 'Kelola salinan cadangan data bank mini')
+@section('title', 'Pengaturan Sistem & Database')
+@section('page-title', 'Pengaturan Sistem & Database')
+@section('page-subtitle', 'Kelola parameter operasional bank mini dan salinan cadangan data terpusat')
 
 @section('list-page-class', 'list-page')
 @section('content')

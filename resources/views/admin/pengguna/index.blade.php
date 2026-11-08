@@ -6,7 +6,7 @@
 
 @section('list-page-class', 'list-page')
 @section('content')
-    <div class="page-animate">
+    <div class="page-animate pengguna-management-page">
         <div class="page-header">
             <div>
                 <h1>Manajemen Pengguna &amp; Nasabah</h1>
@@ -15,11 +15,22 @@
             <div class="d-flex gap-3 small"><span>Total: <strong>{{ number_format($totalUsers, 0, ',', '.') }}</strong></span><span>Aktif: <strong>{{ number_format($activeUsers, 0, ',', '.') }}</strong></span><span>Tahun Ajaran: <strong>2026/2027</strong></span></div>
         </div>
 
-        <div class="nav nav-tabs mb-3" role="tablist" aria-label="Manajemen pengguna dan nasabah">
-            <a class="nav-link {{ $activeTab === 'list' ? 'active' : '' }}" href="{{ route('admin.pengguna.index', ['tab' => 'list']) }}"><i class="fa-solid fa-users me-1"></i>Daftar Pengguna &amp; Nasabah</a>
-            <a class="nav-link {{ $activeTab === 'import' ? 'active' : '' }}" href="{{ route('admin.pengguna.index', ['tab' => 'import']) }}"><i class="fa-solid fa-file-import me-1"></i>Import Data Nasabah (CSV)</a>
-            <a class="nav-link {{ $activeTab === 'history' ? 'active' : '' }}" href="{{ route('admin.pengguna.index', ['tab' => 'history']) }}"><i class="fa-solid fa-clock-rotate-left me-1"></i>Riwayat &amp; Log Import</a>
-        </div>
+        <nav class="pengguna-section-tabs" aria-label="Manajemen pengguna dan nasabah">
+            <a class="pengguna-section-tab {{ $activeTab === 'list' ? 'active' : '' }}" href="{{ route('admin.pengguna.index', ['tab' => 'list']) }}">
+                <span class="pengguna-tab-icon"><i class="fa-solid fa-users"></i></span>
+                <span class="pengguna-tab-label">Daftar Pengguna &amp; Nasabah</span>
+                <span class="pengguna-tab-count">{{ number_format($totalUsers, 0, ',', '.') }}</span>
+            </a>
+            <a class="pengguna-section-tab {{ $activeTab === 'import' ? 'active' : '' }}" href="{{ route('admin.pengguna.index', ['tab' => 'import']) }}">
+                <span class="pengguna-tab-icon"><i class="fa-solid fa-file-import"></i></span>
+                <span class="pengguna-tab-label">Import Data Nasabah (CSV)</span>
+                <span class="pengguna-tab-count import-batch">CSV</span>
+            </a>
+            <a class="pengguna-section-tab {{ $activeTab === 'history' ? 'active' : '' }}" href="{{ route('admin.pengguna.index', ['tab' => 'history']) }}">
+                <span class="pengguna-tab-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                <span class="pengguna-tab-label">Riwayat &amp; Log Import</span>
+            </a>
+        </nav>
 
         @if ($activeTab === 'import')
             @include('admin.pengguna.partials.import')
@@ -44,10 +55,10 @@
                         </select>
                         <button class="btn btn-sm btn-primary"><i class="fa-solid fa-filter"></i></button>
                     </form>
-                    <a href="{{ route('admin.users.index', ['modal' => 'petugas']) }}" class="btn btn-success btn-sm"><i class="fa-solid fa-user-plus me-1"></i>Tambah Petugas</a>
-                    <a href="{{ route('admin.nasabah.index', ['modal' => 'nasabah']) }}" class="btn btn-outline-success btn-sm">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahPetugas"><i class="fa-solid fa-user-plus me-1"></i>Tambah Petugas</button>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahNasabah">
                         <i class="fa-solid fa-user-graduate me-1"></i>Tambah Nasabah
-                    </a>
+                    </button>
                     <a href="{{ route('admin.pengguna.index', ['tab' => 'import']) }}" class="btn btn-outline-primary btn-sm">
                         <i class="fa-solid fa-file-import me-1"></i>Import CSV
                     </a>
@@ -236,4 +247,6 @@
         </div>
         @endif
     </div>
+    @include('admin.users._form-modal')
+    @include('admin.nasabah._form-modal')
 @endsection
