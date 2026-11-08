@@ -32,15 +32,12 @@ class PasswordResetController extends Controller
     public function kirimOtp(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'nis' => ['required', 'string', 'max:30'],
-            'no_rekening' => ['required', 'string', 'max:30'],
-            'email' => ['nullable', 'string', 'email'],
+            'email' => ['required', 'string', 'email'],
             'pin_keamanan' => ['required', 'string'],
         ], [
-            'nis.required' => 'NIS wajib diisi.',
-            'no_rekening.required' => 'No Rekening wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
             'pin_keamanan.required' => 'PIN Keamanan wajib diisi.',
-            'email.email' => 'Format salah! Mohon masukkan alamat email yang valid dan ubah teks Anda.',
         ]);
 
         if ($validator->fails()) {
@@ -50,11 +47,9 @@ class PasswordResetController extends Controller
         $data = $validator->validated();
 
         try {
-            $nasabah = $this->otp->verifikasiIdentitas(
-                $data['nis'],
-                $data['no_rekening'],
+            $nasabah = $this->otp->verifikasiEmailDanPin(
+                $data['email'],
                 $data['pin_keamanan'],
-                $data['email'] ?? null,
             );
 
             return response()->json($this->otp->kirimOtp($nasabah));
@@ -66,10 +61,11 @@ class PasswordResetController extends Controller
     public function validasiOtp(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'nis' => ['required', 'string', 'max:30'],
+            'email' => ['required', 'string', 'email'],
             'code' => ['required', 'digits:6'],
         ], [
-            'nis.required' => 'NIS wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
             'code.required' => 'Kode OTP wajib diisi.',
             'code.digits' => 'Kode OTP harus 6 digit.',
         ]);
@@ -80,7 +76,9 @@ class PasswordResetController extends Controller
 
         $data = $validator->validated();
 
-        $nasabah = Nasabah::with('user')->where('nis', $data['nis'])->first();
+        $nasabah = Nasabah::with('user')
+            ->whereHas('user', fn ($query) => $query->whereRaw('LOWER(email) = ?', [mb_strtolower($data['email'])]))
+            ->first();
 
         if (! $nasabah) {
             return response()->json([
@@ -97,7 +95,7 @@ class PasswordResetController extends Controller
 
         $request->session()->put(self::SESSION_KEY, [
             'nasabah_id' => $nasabah->id,
-            'nis' => $nasabah->nis,
+            'email' => $data['email'],
             'nama' => $nasabah->nama_siswa,
         ]);
 
@@ -116,7 +114,7 @@ class PasswordResetController extends Controller
                 ->withErrors(['identitas' => 'Sesi tidak valid. Silakan mulai ulang proses.']);
         }
 
-        return view('auth.buat-password-baru', ['nis' => $session['nis'], 'nama' => $session['nama']]);
+        return view('auth.buat-password-baru', ['nama' => $session['nama']]);
     }
 
     public function simpanPassword(Request $request): JsonResponse

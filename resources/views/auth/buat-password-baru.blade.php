@@ -20,7 +20,7 @@
                             <i class="fa-solid fa-circle-check me-2 mt-1"></i>
                             <div class="small">
                                 <div class="fw-bold">OTP Terverifikasi</div>
-                                <div class="mb-0">Selamat datang kembali, <strong>{{ $nama }}</strong> (NIS: {{ $nis }}). Silakan buat password baru.</div>
+                                <div class="mb-0">Selamat datang kembali, <strong>{{ $nama }}</strong>. Silakan buat password baru.</div>
                             </div>
                         </div>
                     </div>

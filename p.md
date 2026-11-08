@@ -1,447 +1,202 @@
-# Activity Diagram Sistem Bank Mini
+# Spesifikasi Kebutuhan Perangkat Lunak
+## BANK MINI — Sistem Informasi E-Teller Sekolah
 
-Diagram ini merangkum alur yang diterapkan pada aplikasi: autentikasi staf, transaksi teller, laporan kas harian, koreksi, verifikasi supervisor, administrasi, serta layanan nasabah.
+**Versi:** 1.0 (diselaraskan dengan implementasi repository)  
+**Disiapkan oleh:** Muhammad Wildan Faqih Syahputra  
+**Instansi:** SMK Negeri 1 Bantul  
+**Tanggal:** November 2026
 
-## 1. Login staf
+> Dokumen ini merangkum kebutuhan yang dapat dicocokkan dengan kode sumber BANK MINI. Backend yang tersedia dalam repository adalah aplikasi Laravel berbasis web dan REST API nasabah. Source Flutter tidak terdapat pada repository ini, sehingga kebutuhan khusus aplikasi Flutter dianggap belum terverifikasi dan bukan klaim fitur yang telah diimplementasikan. Kode sumber menjadi rujukan implementasi; konfigurasi runtime dan pengujian tetap perlu diverifikasi pada lingkungan deployment.
 
-```mermaid
-flowchart TD
-    A([Mulai]) --> B[Masukkan username atau email dan password]
-    B --> C{Data login valid?}
-    C -->|Tidak| B
-    C -->|Ya| D{Akun aktif?}
-    D -->|Tidak| B
-    D -->|Ya| E{Akun nasabah?}
-    E -->|Ya| F[Login ditolak: nasabah menggunakan E-Teller]
-    F --> B
-    E -->|Tidak| G[Buat sesi login]
-    G --> H{Peran pengguna}
-    H -->|Admin| I[Dashboard admin]
-    H -->|Teller| J[Dashboard teller]
-    H -->|Supervisor| K[Dashboard supervisor]
-    I --> L{Pilih menu}
-    J --> L
-    K --> L
-    L -->|Keluar| M[Hapus sesi dan logout]
-    M --> N([Selesai])
-    L -->|Lanjut| L
-```
+## Riwayat Perubahan
 
-## 2. Transaksi teller
+| Nama | Tanggal | Alasan | Versi |
+|---|---|---|---|
+| Muhammad Wildan Faqih Syahputra | 01 November 2026 | Dokumen awal SRS yang diselaraskan dengan program BANK MINI | 1.0 |
 
-```mermaid
-flowchart TD
-    A([Mulai]) --> B[Buka menu transaksi]
-    B --> C[Masukkan nomor rekening, NIS, atau pindai QR]
-    C --> D[Cari data nasabah]
-    D --> E{Nasabah ditemukan, aktif, dan tidak diarsipkan?}
-    E -->|Tidak| C
-    E -->|Ya| F[Tampilkan data dan saldo nasabah]
-    F --> G[Pilih setoran atau penarikan]
-    G --> H[Masukkan jumlah, PIN 6 digit, dan catatan opsional]
-    H --> I{Formulir dan PIN valid?}
-    I -->|Tidak| H
-    I -->|Ya| J{Token formulir pernah dipakai?}
-    J -->|Ya| K[Buka bukti transaksi yang sudah tercatat]
-    K --> Z([Selesai])
-    J -->|Tidak| L{Transaksi duplikat terdeteksi?}
-    L -->|Ya| K
-    L -->|Tidak| M{Jenis transaksi}
-    M -->|Setoran| Q[Hitung saldo setelah setoran]
-    M -->|Penarikan| N{Saldo mencukupi?}
-    N -->|Tidak| H
-    N -->|Ya| O{Saldo setelah penarikan memenuhi saldo minimum?}
-    O -->|Tidak| H
-    O -->|Ya| P{Melebihi batas penarikan besar?}
-    P -->|Ya| R{Konfirmasi H-1 diberikan?}
-    R -->|Tidak| H
-    R -->|Ya| S[Lanjutkan transaksi]
-    P -->|Tidak| S
-    Q --> T[Simpan transaksi berstatus disetujui]
-    S --> T
-    T --> U[Perbarui saldo nasabah]
-    U --> V[Buat nomor bukti dan catatan jurnal]
-    V --> W[Catat aktivitas dan kirim notifikasi ke nasabah]
-    W --> X[Tampilkan atau cetak bukti transaksi]
-    X --> Z
-```
+## 1. Pendahuluan
 
-## 3. Laporan kas harian teller
+### 1.1 Tujuan
+Dokumen ini menjadi acuan kebutuhan, pengembangan, pengujian, dan pemeliharaan BANK MINI. Dokumen membedakan fungsi yang tersedia dalam kode dari fungsi yang belum dapat diverifikasi agar tidak menjanjikan kemampuan yang belum terbukti.
 
-```mermaid
-flowchart TD
-    A([Mulai]) --> B[Buka laporan harian]
-    B --> C[Hitung transaksi disetujui hari ini]
-    C --> D[Hitung saldo awal dan kas akhir sistem: saldo awal + setoran - penarikan]
-    D --> E[Masukkan kas fisik akhir, rincian pecahan opsional, dan kas ke brankas]
-    E --> F{Data laporan valid dan kas brankas tidak melebihi kas sistem?}
-    F -->|Tidak| E
-    F -->|Ya| G{Laporan hari ini sudah disetujui atau ditolak?}
-    G -->|Ya| H[Tidak dapat mengubah laporan]
-    H --> Z([Selesai])
-    G -->|Tidak| I[Simpan laporan dan selisih kas fisik terhadap sistem]
-    I --> J{Ada selisih?}
-    J -->|Ya| K[Tampilkan peringatan selisih]
-    J -->|Tidak| L[Tampilkan laporan tersimpan]
-    K --> M{Kirim untuk persetujuan?}
-    L --> M
-    M -->|Tidak| Z
-    M -->|Ya| N{Milik teller ini dan status draft atau pending?}
-    N -->|Tidak| Z
-    N -->|Ya| O[Ubah status menjadi menunggu persetujuan]
-    O --> P[Catat waktu pengajuan dan aktivitas]
-    P --> Q[Beritahu supervisor aktif]
-    Q --> Z
-```
+### 1.2 Definisi
 
-## 4. Pengajuan dan verifikasi koreksi transaksi
+| Istilah | Definisi |
+|---|---|
+| BANK MINI | Sistem sekolah untuk pengelolaan rekening tabungan dan transaksi nasabah. |
+| Nasabah | Pemilik rekening, umumnya siswa atau warga sekolah. |
+| Admin | Pengelola pengguna, nasabah, konfigurasi, backup, dan proses administratif. |
+| Teller | Petugas yang memproses transaksi, laporan kas, dan pengajuan koreksi. |
+| Supervisor | Petugas yang memeriksa laporan, koreksi, dan laporan keuangan. |
+| Sanctum | Mekanisme token autentikasi API Laravel. |
+| PIN | PIN keamanan enam digit nasabah; disimpan sebagai hash. |
+| Koreksi | Pengajuan pembalikan/koreksi transaksi yang melalui persetujuan. |
+| TBD | Hal yang belum dipastikan atau belum dapat dibuktikan dari repository. |
 
-```mermaid
-flowchart TD
-    A([Mulai]) --> B[Teller membuka daftar transaksi yang dapat dikoreksi]
-    B --> C{Pilih transaksi asli?}
-    C -->|Ya| D[Pilih transaksi milik teller yang disetujui dan belum dikoreksi]
-    C -->|Tidak| E[Ajukan koreksi tanpa transaksi asli]
-    D --> F[Masukkan alasan koreksi dan data transaksi pembalik]
-    E --> F
-    F --> G{Data valid, nasabah sesuai, belum ada koreksi duplikat, dan arah koreksi benar?}
-    G -->|Tidak| F
-    G -->|Ya| H[Simpan pengajuan berstatus menunggu]
-    H --> I[Catat aktivitas dan beri notifikasi supervisor]
-    I --> J[Supervisor membuka pengajuan]
-    J --> K{Status masih menunggu dan kode verifikasi diwajibkan?}
-    K -->|Ya| L{Kode verifikasi benar?}
-    L -->|Tidak| J
-    L -->|Ya| M{Keputusan supervisor}
-    K -->|Tidak| M
-    M -->|Tolak| N[Masukkan alasan penolakan]
-    N --> O[Simpan status ditolak dan beri tahu teller]
-    O --> Z([Selesai])
-    M -->|Setujui| P[Periksa saldo dan data koreksi]
-    P --> Q{Koreksi valid dan saldo mencukupi?}
-    Q -->|Tidak| J
-    Q -->|Ya| R[Buat transaksi koreksi dan perbarui saldo serta jurnal]
-    R --> S[Tandai transaksi asli sudah dikoreksi, jika ada]
-    S --> T[Simpan status disetujui, catat aktivitas, dan beri tahu teller]
-    T --> Z
-```
+### 1.3 Pembaca
+Pengembang, analis, penguji, pengelola sekolah, Admin, Teller, Supervisor, serta pihak yang menyetujui ruang lingkup sistem.
 
-## 5. Persetujuan dan verifikasi supervisor
+### 1.4 Ruang Lingkup
+Sistem yang dapat diverifikasi terdiri dari aplikasi web Laravel untuk Admin, Teller, dan Supervisor, serta REST API Laravel untuk nasabah. Cakupan mencakup autentikasi, data pengguna dan nasabah, transaksi, persetujuan nasabah atas transaksi tertentu, laporan kas dan keuangan, koreksi, verifikasi, jadwal, notifikasi, permintaan PIN, backup, dan ekspor laporan.
 
-```mermaid
-flowchart TD
-    A([Mulai]) --> B[Admin atau supervisor membuka pusat verifikasi]
-    B --> C{Pilih antrean}
-    C -->|Laporan kas| D[Buka laporan berstatus menunggu persetujuan]
-    D --> E{Selisih kas tidak nol?}
-    E -->|Ya| F[Persetujuan ditolak; pilih pending atau tolak dengan catatan]
-    F --> G{Keputusan}
-    G -->|Pending| H[Simpan status pending]
-    G -->|Tolak| I[Simpan status ditolak dan alasan]
-    E -->|Tidak| J{Setujui, pending, atau tolak?}
-    J -->|Setujui| K[Simpan status disetujui dan data pemeriksa]
-    K --> L{Ada kas dipindahkan ke brankas?}
-    L -->|Ya| M[Catat pemindahan dan jurnal kas]
-    L -->|Tidak| N[Beritahu teller]
-    M --> N
-    J -->|Pending| H
-    J -->|Tolak| I
-    H --> N
-    I --> N
-    C -->|Verifikasi transaksi harian| O[Pilih tanggal dan tinjau transaksi serta ringkasan]
-    O --> P{Hari ini sudah disetujui atau tidak ada transaksi?}
-    P -->|Ya| Q[Tolak proses verifikasi]
-    P -->|Tidak| R{Keputusan diterima atau ditolak?}
-    R -->|Ditolak| S[Masukkan catatan penolakan]
-    R -->|Diterima| T[Simpan snapshot ringkasan dan status diterima]
-    S --> U[Simpan status penolakan; tanggal dapat ditinjau ulang]
-    T --> V[Beritahu teller terkait]
-    U --> V
-    V --> Z([Selesai])
-    Q --> Z
-    N --> Z
-    C -->|Koreksi| W[Tinjau dan proses koreksi sesuai diagram koreksi]
-    C -->|Permintaan PIN| X[Tinjau permintaan perubahan PIN]
-    X --> Y{Setujui atau tolak?}
-    Y -->|Setujui| AA[Validasi permintaan, perbarui PIN nasabah, dan tandai diproses]
-    Y -->|Tolak| AB[Masukkan alasan; PIN lama tetap berlaku]
-    AA --> Z
-    AB --> Z
-    C -->|Aktivitas| AC[Lihat log aktivitas terbaru]
-    AC --> Z
-    W --> Z
-```
+Tidak ditemukan source Flutter/Dart pada repository ini. Aplikasi mobile native, SSO sekolah, pembayaran online, transfer antar rekening, dan integrasi payment gateway tidak dinyatakan sebagai fungsi terimplementasi.
 
-## 6. Portal dan aktivasi nasabah
+### 1.5 Penomoran
+Kebutuhan fungsional menggunakan REQ-[MODUL]-[nomor], non-fungsional NFR-[kategori]-[nomor], dan aturan bisnis BR-[nomor].
 
-```mermaid
-flowchart TD
-    A([Mulai]) --> B{Akun sudah aktif?}
-    B -->|Belum| C[Ajukan kode aktivasi dengan NIS dan email]
-    C --> D{NIS, email, peran nasabah, dan produk tabungan cocok?}
-    D -->|Tidak| C
-    D -->|Ya| E{Akun sudah aktif?}
-    E -->|Ya| F[Informasikan akun sudah aktif]
-    F --> Z([Selesai])
-    E -->|Tidak| G[Kirim kode aktivasi]
-    G --> H[Masukkan kode]
-    H --> I{Akun terkunci karena percobaan gagal?}
-    I -->|Ya| J[Tunggu masa kunci berakhir]
-    J --> H
-    I -->|Tidak| K{Kode valid dan belum kedaluwarsa?}
-    K -->|Tidak| L[Tambah hitungan gagal]
-    L --> M{Sudah 3 kali gagal?}
-    M -->|Ya| N[Kunci aktivasi selama 1 jam]
-    M -->|Tidak| H
-    N --> Z
-    K -->|Ya| O[Terbitkan token sementara 15 menit]
-    O --> P[Masukkan password dan PIN 6 digit]
-    P --> Q{Token, password, dan PIN memenuhi aturan?}
-    Q -->|Tidak| P
-    Q -->|Ya| R[Simpan password dan PIN terenkripsi serta aktifkan akun]
-    R --> S[Terbitkan token akses]
-    B -->|Ya| T[Masukkan kredensial untuk login]
-    S --> U[Buka beranda nasabah]
-    T --> V{Login berhasil dan akun aktif?}
-    V -->|Tidak| T
-    V -->|Ya| U
-    U --> W[Lihat ringkasan saldo, transaksi, profil, dan notifikasi]
-    W --> X{Pilih tindakan}
-    X -->|Lihat detail atau riwayat| W
-    X -->|Ubah PIN| Y[Masukkan PIN lama dan PIN baru]
-    Y --> AA{PIN lama benar, PIN baru aman, dan tidak ada permintaan tertunda?}
-    AA -->|Tidak| Y
-    AA -->|Ya| AB[Simpan permintaan PIN dan beri tahu admin serta supervisor]
-    AB --> W
-    X -->|Keluar| Z
-```
+### 1.6 Referensi
+Kode sumber Laravel BANK MINI, khususnya `routes/web.php`, `routes/api.php`, controller, model, service/support, dan migrasi basis data. Dokumentasi resmi Laravel, Sanctum, PHP, dan MySQL digunakan sebagai referensi teknologi.
 
-## 7. Administrasi nasabah dan impor
+## 2. Deskripsi Umum
 
-```mermaid
-flowchart TD
-    A([Mulai]) --> B[Admin membuka menu nasabah]
-    B --> C{Pilih tindakan}
-    C -->|Tambah atau ubah| D[Masukkan data nasabah]
-    D --> E{Data valid?}
-    E -->|Tidak| D
-    E -->|Ya| F[Simpan data nasabah]
-    C -->|Arsipkan| G[Pilih nasabah dan konfirmasi]
-    G --> H[Arsipkan nasabah]
-    C -->|Pulihkan| I[Pilih nasabah arsip]
-    I --> J[Pulihkan nasabah]
-    C -->|Impor| K[Unduh template dan unggah file]
-    K --> L[Pratinjau serta validasi data impor]
-    L --> M{Konfirmasi impor?}
-    M -->|Tidak| N[Perbaiki file atau batalkan]
-    N --> K
-    M -->|Ya| O[Proses impor dan tampilkan hasil]
-    F --> P([Selesai])
-    H --> P
-    J --> P
-    O --> P
-```
+### 2.1 Perspektif Produk
+Aplikasi menggunakan Laravel dengan basis data relasional. Web dan API mengakses data melalui backend Laravel; API nasabah menggunakan token Sanctum. Basis data menjadi sumber data bersama. Ketersediaan deployment, mail server, serta konfigurasi keamanan bergantung pada lingkungan produksi.
 
-# Sequence Diagram Sistem Bank Mini
+### 2.2 Fungsi Utama
+- Login/logout web dan API, pembatasan role dan status akun.
+- Pengelolaan staf dan nasabah, termasuk pengarsipan/pemulihan serta impor nasabah.
+- Transaksi setoran/penarikan dan alur otorisasi transaksi nasabah melalui API.
+- Pengajuan dan persetujuan koreksi transaksi.
+- Laporan kas harian, rekonsiliasi, persetujuan laporan, verifikasi harian.
+- Laporan keuangan dan ekspor PDF/XLSX sesuai modul yang tersedia.
+- Jadwal petugas, notifikasi, pengajuan PIN, konfigurasi dan backup.
+- API nasabah untuk dashboard, saldo, profil, mutasi, otorisasi transaksi, dan notifikasi.
 
-Diagram sequence berikut menggambarkan pertukaran pesan antaraktor, aplikasi, dan penyimpanan data pada alur inti sistem.
+### 2.3 Kelas Pengguna
 
-## 1. Login staf
+| Peran | Fungsi |
+|---|---|
+| Admin | Pengelolaan data staf/nasabah, konfigurasi, backup, dan proses administratif; memiliki akses pada sejumlah modul review. |
+| Teller | Pemrosesan transaksi, laporan kas, jadwal, dan pengajuan koreksi. |
+| Supervisor | Review/approval laporan dan koreksi, audit, serta laporan keuangan. |
+| Nasabah | Mengakses API untuk akun, saldo, profil, mutasi, otorisasi transaksi dan notifikasi. |
 
-```mermaid
-sequenceDiagram
-    actor Staf as Admin/Teller/Supervisor
-    participant UI as Halaman Login
-    participant Auth as LoginController
-    participant DB as Database
-    participant Session as Sesi Aplikasi
+### 2.4 Lingkungan Operasi
+Backend adalah Laravel 13.x/PHP 8.3 sebagaimana dinyatakan dalam konfigurasi/dokumen proyek, dengan MySQL sebagai basis data yang dituju. Web diakses melalui browser modern; API menggunakan JSON. Source Flutter tidak tersedia untuk memvalidasi persyaratan OS/perangkat mobile.
 
-    Staf->>UI: Masukkan username/email dan password
-    UI->>Auth: Kirim kredensial
-    Auth->>DB: Cari pengguna berdasarkan username/email
-    DB-->>Auth: Data pengguna
-    alt Kredensial salah
-        Auth-->>UI: Tampilkan pesan gagal
-    else Akun tidak aktif
-        Auth-->>UI: Tampilkan pesan akun tidak aktif
-    else Pengguna adalah nasabah
-        Auth-->>UI: Arahkan ke login E-Teller
-    else Kredensial valid dan staf aktif
-        Auth->>Session: Autentikasi dan regenerasi sesi
-        Auth->>DB: Catat aktivitas login
-        Auth-->>UI: Arahkan ke dashboard sesuai peran
-        UI-->>Staf: Tampilkan dashboard
-    end
-```
+### 2.5 Batasan dan Asumsi
+- Hak akses aktual mengikuti middleware dan route yang terpasang.
+- Email OTP, HTTPS, backup, dan performa bergantung pada konfigurasi server.
+- FCM disebut sebagai rencana/dukungan token perangkat, namun push aktif tidak diklaim tanpa verifikasi deployment.
+- Angka kinerja/kapasitas dalam dokumen awal merupakan target, bukan hasil uji beban.
 
-## 2. Transaksi teller
+## 3. Antarmuka Eksternal
 
-```mermaid
-sequenceDiagram
-    actor Teller
-    participant UI as Halaman Transaksi
-    participant TC as TransaksiController
-    participant QR as QrisNasabah
-    participant DB as Database
-    participant Journal as Jurnal Transaksi
-    participant Notify as Notifikasi
+### 3.1 Antarmuka Pengguna
+Web menyediakan antarmuka per role. API nasabah menyajikan data JSON untuk client. Rincian visual final bergantung pada antarmuka web yang ada; desain aplikasi Flutter tidak dapat diverifikasi dari repository.
 
-    Teller->>UI: Cari nasabah (rekening/NIS/QR)
-    UI->>TC: Permintaan pencarian
-    TC->>QR: Cari nasabah berdasarkan identitas
-    QR->>DB: Ambil data rekening/nasabah
-    DB-->>QR: Data nasabah
-    QR-->>TC: Hasil pencarian
-    alt Tidak ditemukan/tidak aktif/diarsipkan
-        TC-->>UI: Tampilkan pesan nasabah tidak dapat dilayani
-    else Nasabah layak dilayani
-        TC-->>UI: Tampilkan profil dan saldo
-        Teller->>UI: Pilih setoran/penarikan, jumlah, PIN, catatan
-        UI->>TC: Kirim transaksi beserta token formulir
-        TC->>DB: Periksa token transaksi sebelumnya
-        alt Token sudah pernah dipakai
-            DB-->>TC: Transaksi sebelumnya ditemukan
-            TC-->>UI: Arahkan ke bukti transaksi sebelumnya
-        else Token baru
-            TC->>DB: Periksa duplikasi transaksi
-            alt Duplikat terdeteksi
-                DB-->>TC: Transaksi duplikat ditemukan
-                TC-->>UI: Tampilkan bukti transaksi sebelumnya
-            else Transaksi baru
-                TC->>DB: Validasi nasabah, PIN, saldo dan batas penarikan
-                alt Validasi gagal
-                    DB-->>TC: Validasi ditolak
-                    TC-->>UI: Tampilkan alasan dan minta koreksi input
-                else Validasi berhasil
-                    TC->>DB: Mulai transaksi database
-                    TC->>DB: Simpan transaksi berstatus disetujui
-                    TC->>DB: Perbarui saldo nasabah
-                    TC->>Journal: Catat entri jurnal
-                    TC->>DB: Catat aktivitas
-                    TC->>DB: Commit transaksi database
-                    TC->>Notify: Kirim notifikasi transaksi ke nasabah
-                    TC-->>UI: Tampilkan nomor bukti transaksi
-                    UI-->>Teller: Tampilkan/cetak bukti
-                end
-            end
-        end
-    end
-```
+### 3.2 Perangkat Keras
+Komputer/browser untuk web dan server untuk Laravel/MySQL. API dapat diakses perangkat klien yang mampu melakukan HTTPS dan memproses JSON.
 
-## 3. Pengajuan laporan kas harian
+### 3.3 Antarmuka Perangkat Lunak
+Laravel, Sanctum, basis data relasional, dan pustaka PDF/QR/XLSX yang digunakan proyek. Integrasi persis harus mengikuti `composer.json` dan konfigurasi deployment.
 
-```mermaid
-sequenceDiagram
-    actor Teller
-    participant UI as Halaman Laporan
-    participant LC as LaporanController
-    participant DB as Database
-    participant Notify as Notifikasi
+### 3.4 Komunikasi
+Web memakai sesi Laravel; API memakai Bearer token Sanctum dan payload JSON. HTTPS wajib pada produksi. Endpoint login dan pemulihan akun dibatasi laju permintaannya.
 
-    Teller->>UI: Buka laporan hari ini
-    UI->>LC: Minta ringkasan kas
-    LC->>DB: Ambil transaksi disetujui hari ini dan saldo awal
-    DB-->>LC: Transaksi, setoran, dan penarikan
-    LC-->>UI: Tampilkan kas awal dan kas akhir sistem
-    Teller->>UI: Isi kas fisik, pecahan, dan kas ke brankas
-    UI->>LC: Simpan laporan
-    LC->>DB: Periksa kepemilikan, status, dan validasi nominal
-    alt Laporan telah disetujui/ditolak atau data tidak valid
-        DB-->>LC: Tolak perubahan
-        LC-->>UI: Tampilkan alasan penolakan
-    else Valid
-        LC->>DB: Simpan laporan dan selisih kas
-        DB-->>LC: Laporan tersimpan
-        LC-->>UI: Tampilkan laporan dan peringatan selisih bila ada
-        opt Teller mengirim untuk persetujuan
-            Teller->>UI: Ajukan laporan
-            UI->>LC: Submit laporan
-            LC->>DB: Pastikan pemilik dan status draft/pending
-            LC->>DB: Ubah status menjadi menunggu persetujuan
-            LC->>DB: Catat aktivitas dan waktu pengajuan
-            LC->>Notify: Beri tahu supervisor aktif
-            LC-->>UI: Tampilkan status pengajuan
-        end
-    end
-```
+## 4. Kebutuhan Fungsional
 
-## 4. Pemeriksaan dan persetujuan supervisor
+### 4.1 Autentikasi dan Otorisasi
+- **REQ-AUT-01:** Sistem menyediakan login/logout web bagi staf dan membatasi akses dengan role serta status aktif.
+- **REQ-AUT-02:** API mengautentikasi akun nasabah melalui Sanctum; akun nonaktif atau bukan nasabah tidak dapat menggunakan login nasabah.
+- **REQ-AUT-03:** API menyediakan aktivasi akun dan pemulihan password dengan verifikasi kode/OTP sesuai alur backend.
+- **REQ-AUT-04:** Endpoint autentikasi sensitif menerapkan throttling.
+- **REQ-AUT-05:** Nasabah tidak dapat mengakses data transaksi milik nasabah lain.
 
-```mermaid
-sequenceDiagram
-    actor Supervisor as Supervisor/Admin
-    participant UI as Pusat Verifikasi
-    participant VC as VerifikasiController
-    participant DB as Database
-    participant Journal as Jurnal Kas
-    participant Notify as Notifikasi
+### 4.2 Manajemen Pengguna dan Nasabah
+- **REQ-MN-01:** Admin dapat mengelola akun staf melalui modul pengguna.
+- **REQ-MN-02:** Admin dapat membuat, mengubah, mengarsipkan, memulihkan, dan menghapus data nasabah sesuai validasi aplikasi.
+- **REQ-MN-03:** Sistem mendukung pencarian nasabah dan impor massal dengan pratinjau, konfirmasi, template, serta riwayat impor.
+- **REQ-MN-04:** Akun nasabah, nomor rekening, PIN, dan status mengikuti validasi serta relasi yang diterapkan model dan migrasi.
+- **REQ-MN-05:** Sistem menyediakan QR rekening apabila tersedia pada data/profil nasabah.
 
-    Supervisor->>UI: Buka antrean laporan
-    UI->>VC: Minta laporan menunggu persetujuan
-    VC->>DB: Ambil laporan dan rincian kas
-    DB-->>VC: Data laporan
-    VC-->>UI: Tampilkan laporan
-    Supervisor->>UI: Pilih setujui, pending, atau tolak
-    UI->>VC: Kirim keputusan dan catatan
-    VC->>DB: Periksa status dan selisih kas
-    alt Laporan memiliki selisih dan diminta disetujui
-        VC-->>UI: Tolak persetujuan; minta pending atau penolakan
-    else Keputusan pending
-        VC->>DB: Ubah status menjadi pending
-        VC->>Notify: Beri tahu teller
-        VC-->>UI: Tampilkan status pending
-    else Keputusan ditolak
-        VC->>DB: Simpan status ditolak dan alasan
-        VC->>Notify: Beri tahu teller
-        VC-->>UI: Tampilkan status ditolak
-    else Disetujui tanpa selisih
-        VC->>DB: Simpan status, pemeriksa, waktu, dan catatan
-        opt Ada kas yang dipindahkan ke brankas
-            VC->>DB: Catat pemindahan kas
-            VC->>Journal: Catat jurnal pemindahan
-        end
-        VC->>Notify: Beri tahu teller
-        VC-->>UI: Tampilkan status disetujui
-    end
-```
+### 4.3 Transaksi dan Otorisasi Nasabah
+- **REQ-TRX-01:** Teller dapat mencari nasabah dan mengajukan pemrosesan setoran/penarikan.
+- **REQ-TRX-02:** Sistem memvalidasi status nasabah, nominal, PIN, dan aturan saldo sebelum transaksi dikomit.
+- **REQ-TRX-03:** Transaksi dan perubahan terkait harus menjaga konsistensi data serta jurnal sesuai implementasi backend.
+- **REQ-TRX-04:** Sistem menyediakan alur otorisasi transaksi nasabah melalui API: melihat, menyetujui, atau menolak permintaan yang menjadi miliknya.
+- **REQ-TRX-05:** Sistem membatasi percobaan PIN dan menerapkan masa berlaku/kunci pada permintaan otorisasi sebagaimana konfigurasi backend.
+- **REQ-TRX-06:** Sistem menyediakan struk transaksi untuk ditampilkan, dicetak, atau diunduh PDF melalui web.
+- **REQ-TRX-07:** Sistem mencegah pemrosesan ganda sesuai mekanisme token/fingerprint yang diterapkan kode.
 
-## 5. Nasabah mengajukan perubahan PIN
+### 4.4 Koreksi Transaksi
+- **REQ-KOR-01:** Teller dapat mengirim pengajuan koreksi dengan alasan.
+- **REQ-KOR-02:** Supervisor dapat menyetujui atau menolak pengajuan koreksi.
+- **REQ-KOR-03:** Persetujuan koreksi memproses perubahan/transaksi pembalik dan pencatatan terkait berdasarkan aturan service.
+- **REQ-KOR-04:** Perubahan status dan tindakan koreksi tercatat sesuai mekanisme audit aplikasi.
 
-```mermaid
-sequenceDiagram
-    actor Nasabah
-    participant App as Aplikasi E-Teller
-    participant API as API Nasabah
-    participant PIN as PermintaanPinService
-    participant DB as Database
-    participant Notify as Notifikasi Admin/Supervisor
+### 4.5 Laporan Kas dan Verifikasi
+- **REQ-KAS-01:** Teller dapat menyusun, melihat, dan mengirim laporan kas harian.
+- **REQ-KAS-02:** Sistem mendukung rekonsiliasi kas berdasarkan data yang dimasukkan.
+- **REQ-KAS-03:** Supervisor dapat meninjau laporan dan melakukan approve, reject, atau pending sesuai validasi.
+- **REQ-KAS-04:** Admin atau Supervisor dapat melakukan verifikasi harian berdasarkan kewenangan route yang tersedia.
+- **REQ-KAS-05:** Laporan dan verifikasi mengikuti batasan status serta aturan integritas backend.
 
-    Nasabah->>App: Masukkan PIN lama dan PIN baru
-    App->>API: Kirim permintaan dengan token autentikasi
-    API->>PIN: Validasi dan proses pengajuan
-    PIN->>DB: Ambil data nasabah dan permintaan PIN aktif
-    DB-->>PIN: Data PIN dan status pengajuan
-    alt PIN lama salah/PIN baru lemah atau sama/ada permintaan menunggu
-        PIN-->>API: Tolak permintaan beserta alasan
-        API-->>App: Tampilkan pesan validasi
-    else Permintaan valid
-        PIN->>DB: Simpan hash PIN baru sebagai permintaan menunggu
-        PIN->>Notify: Beri tahu admin dan supervisor aktif
-        PIN-->>API: Kembalikan status pengajuan
-        API-->>App: Tampilkan konfirmasi pengajuan
-    end
-    opt Admin atau supervisor memproses permintaan
-        actor Petugas as Admin/Supervisor
-        Petugas->>API: Setujui atau tolak permintaan
-        API->>PIN: Proses keputusan
-        PIN->>DB: Kunci dan periksa permintaan yang masih menunggu
-        alt Disetujui
-            PIN->>DB: Terapkan hash PIN ke nasabah dan rekening
-            PIN->>DB: Tandai permintaan diproses
-        else Ditolak dengan alasan
-            PIN->>DB: Tandai ditolak; PIN lama tetap berlaku
-        end
-        PIN-->>API: Hasil pemrosesan
-        API-->>Petugas: Tampilkan hasil keputusan
-    end
-```
+### 4.6 Laporan Keuangan
+- **REQ-LP-01:** Modul laporan menyediakan laporan operasional/harian, buku besar, jurnal, mutasi nasabah, saldo produk, laporan tahunan, dan kartu simpanan sesuai route yang tersedia.
+- **REQ-LP-02:** Laporan mendukung filter yang disediakan masing-masing modul.
+- **REQ-LP-03:** Sistem menyediakan ekspor/unduh PDF dan/atau XLSX pada laporan yang mendukungnya.
+- **REQ-LP-04:** Akses laporan dibatasi berdasarkan role.
+
+### 4.7 Jadwal Petugas
+- **REQ-JP-01:** Admin dan Teller dapat mengakses fungsi pengelolaan jadwal sesuai route.
+- **REQ-JP-02:** Supervisor dapat melihat jadwal.
+- **REQ-JP-03:** Sistem memvalidasi bentrokan jadwal sesuai service jadwal.
+
+### 4.8 PIN dan Notifikasi
+- **REQ-PIN-01:** Nasabah dapat mengirim permintaan perubahan PIN melalui API; permintaan disimpan sebagai pengajuan, bukan langsung diterapkan.
+- **REQ-PIN-02:** Nasabah dapat melihat status pengajuan PIN.
+- **REQ-PIN-03:** Admin/Supervisor dapat memproses persetujuan atau penolakan pengajuan PIN melalui web.
+- **REQ-NOT-01:** Pengguna terautentikasi dapat melihat notifikasi, menandai satu/semua telah dibaca, dan menghapus notifikasi sesuai hak kepemilikan.
+
+### 4.9 API Nasabah
+- **REQ-API-01:** API menyediakan dashboard, saldo, profil, serta informasi rekening nasabah yang sedang login.
+- **REQ-API-02:** API menyediakan daftar/detail transaksi yang diotorisasi untuk nasabah tersebut, dengan filter dan paginasi.
+- **REQ-API-03:** API mendukung keluaran mutasi/statement, termasuk PDF jika format tersebut diaktifkan.
+- **REQ-API-04:** Respons API tidak boleh membocorkan PIN atau kredensial.
+- **REQ-API-05:** API menyediakan pengelolaan notifikasi milik nasabah.
+
+### 4.10 Konfigurasi, Backup, dan Audit
+- **REQ-ADM-01:** Admin dapat mengelola konfigurasi yang disediakan modul konfigurasi.
+- **REQ-ADM-02:** Admin dapat membuat, mengunduh, dan menghapus file backup melalui web.
+- **REQ-ADM-03:** Sistem mencatat aktivitas penting melalui activity log sesuai implementasi.
+
+## 5. Kebutuhan Non-Fungsional dan Aturan Bisnis
+
+### 5.1 Kinerja
+Target dashboard, transaksi, API, ekspor, dan jumlah pengguna simultan harus diuji pada server sasaran. Nilai target dari dokumen awal—misalnya API baca 500 ms, transaksi 2 detik, 50 pengguna bersamaan—belum dinyatakan sebagai hasil terukur.
+
+### 5.2 Keamanan
+- Password/PIN disimpan sebagai hash dan tidak dikirim sebagai data keluaran.
+- Semua operasi memeriksa autentikasi, role, status akun, dan kepemilikan data.
+- Validasi input dilakukan pada backend; form web memakai perlindungan CSRF Laravel.
+- Produksi harus menggunakan HTTPS dan kredensial database berhak minimum.
+- Endpoint sensitif menerapkan throttling.
+
+### 5.3 Integritas dan Ketersediaan
+Transaksi keuangan harus atomik, nominal valid, saldo mengikuti batas bisnis, relasi basis data dijaga, dan jurnal mengikuti mekanisme pembukuan aplikasi. Ketersediaan, backup berkala, pemulihan, uptime, serta pemrosesan asinkron perlu dibuktikan pada deployment dan tidak diasumsikan dari keberadaan route saja.
+
+### 5.4 Usability dan Pemeliharaan
+Antarmuka web menggunakan bahasa Indonesia. Format uang/tanggal dan responsivitas perlu diverifikasi terhadap tampilan aktual. Kode mengikuti pola Laravel yang digunakan proyek; pengujian otomatis harus dijalankan sebelum rilis.
+
+### 5.5 Aturan Bisnis
+- Saldo nasabah tidak boleh negatif dan nominal transaksi harus positif.
+- Penarikan tunduk pada saldo tersedia dan batas saldo minimum yang dikonfigurasi.
+- PIN nasabah wajib diverifikasi pada alur yang mewajibkannya.
+- Nasabah nonaktif/arsip tidak boleh melakukan transaksi.
+- Koreksi memerlukan persetujuan dan meninggalkan jejak transaksi.
+- Pengajuan PIN berlaku setelah disetujui.
+- Jadwal petugas tidak boleh bentrok bila validasi service menolaknya.
+- Akses data API nasabah dibatasi pada pemilik akun.
+
+## 6. Data dan Operasional
+Entitas yang teridentifikasi dari model/migrasi mencakup users, nasabah, transaksi, jurnal akuntansi, laporan harian dan detailnya, rekonsiliasi kas dan detailnya, koreksi transaksi, verifikasi harian, permintaan reset PIN, notifikasi, jadwal petugas, konfigurasi, sequence nomor, activity log, batch impor nasabah, token Sanctum, serta tabel infrastruktur Laravel. Nama kolom dan constraint final mengikuti migrasi aktif.
+
+Pengujian minimum meliputi autentikasi dan role, manajemen nasabah, transaksi/saldo/jurnal, otorisasi nasabah, koreksi, laporan/verifikasi, permintaan PIN, notifikasi, backup, dan pembatasan kepemilikan API. Jalankan test suite yang tersedia pada repository sebelum rilis.
+
+## Appendix A — Hal yang Perlu Diverifikasi
+1. Source aplikasi Flutter tidak tersedia dalam repository ini; seluruh klaim UI, biometrik, preferensi lokal, kompatibilitas Android/iOS, dan push notification mobile belum diverifikasi.
+2. Nilai kinerja, kapasitas simultan, uptime, serta hasil uji beban perlu diuji pada infrastruktur produksi.
+3. Konfigurasi SMTP/OTP, TLS/HTTPS, backup dan restore perlu diuji pada server target.
+4. Aturan saldo minimum, batas penarikan, H-1, jurnal koreksi, dan status verifikasi perlu dicocokkan dengan konfigurasi aktif dan test suite.
+5. Tabel atau fitur yang hanya muncul dalam migrasi historis tidak otomatis berarti fitur aktif; rujukan utamanya adalah route, controller, service, dan skema migrasi yang berlaku.

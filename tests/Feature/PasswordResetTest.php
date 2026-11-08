@@ -22,13 +22,10 @@ function passwordResetNasabah(): Nasabah
     return Nasabah::with('user')->where('nis', '20241001')->firstOrFail();
 }
 
-function passwordResetRequestPayload(string $nis, ?string $noRekening = null, ?string $pin = null): array
+function passwordResetRequestPayload(string $email = '20241001@student.bankmini.test', ?string $pin = null): array
 {
-    $nasabah = passwordResetNasabah();
-
     return [
-        'nis' => $nis,
-        'no_rekening' => $noRekening ?? $nasabah->no_rekening,
+        'email' => $email,
         'pin_keamanan' => $pin ?? '123456',
     ];
 }
@@ -37,22 +34,22 @@ it('menampilkan halaman lupa password', function () {
     $this->get(route('password.request'))
         ->assertOk()
         ->assertSee('Lupa Password')
-        ->assertSee('NIS')
-        ->assertSee('No Rekening')
+        ->assertSee('Email')
+        ->assertDontSee('No Rekening')
         ->assertSee('PIN Keamanan')
         ->assertSee('Kirim OTP');
 });
 
 it('menolak kirim otp dengan identitas tidak ditemukan', function () {
-    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('99999999'))
+    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('missing@bankmini.test'))
         ->assertStatus(422)
-        ->assertJsonFragment(['message' => 'Identitas tidak ditemukan. Periksa kembali NIS dan No Rekening Anda.']);
+        ->assertJsonFragment(['message' => 'Akun dengan email tersebut tidak ditemukan.']);
 
     Mail::assertNothingSent();
 });
 
 it('menolak kirim otp dengan pin keamanan salah', function () {
-    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001', pin: '000000'))
+    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload(pin: '000000'))
         ->assertStatus(422)
         ->assertJsonFragment(['message' => 'PIN Keamanan salah.']);
 
@@ -62,9 +59,9 @@ it('menolak kirim otp dengan pin keamanan salah', function () {
 it('menolak kirim otp ketika user nasabah belum memiliki email', function () {
     User::where('username', '20241001')->update(['email' => null]);
 
-    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001'))
+    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001@student.bankmini.test'))
         ->assertStatus(422)
-        ->assertJsonFragment(['message' => 'Akun nasabah ini belum memiliki email terdaftar. Hubungi Administrator.']);
+        ->assertJsonFragment(['message' => 'Akun dengan email tersebut tidak ditemukan.']);
 
     Mail::assertNothingSent();
 });
@@ -72,7 +69,7 @@ it('menolak kirim otp ketika user nasabah belum memiliki email', function () {
 it('mengirim otp ketika identitas valid', function () {
     $nasabah = passwordResetNasabah();
 
-    $response = $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001'))
+    $response = $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload())
         ->assertOk()
         ->assertJsonFragment([
             'email' => $nasabah->user->email,
@@ -94,7 +91,7 @@ it('mengirim otp ketika identitas valid', function () {
 it('melakukan validasi otp dengan benar dan menghapus otp setelah dipakai', function () {
     $nasabah = passwordResetNasabah();
 
-    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001'));
+    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload());
 
     $code = null;
     Mail::assertSent(OtpMail::class, function (OtpMail $mail) use (&$code) {
@@ -104,7 +101,7 @@ it('melakukan validasi otp dengan benar dan menghapus otp setelah dipakai', func
     });
 
     $response = $this->postJson(route('password.validasi-otp'), [
-        'nis' => $nasabah->nis,
+        'email' => $nasabah->user->email,
         'code' => $code,
     ]);
 
@@ -118,18 +115,18 @@ it('melakukan validasi otp dengan benar dan menghapus otp setelah dipakai', func
 it('menghitung tiga kali kesalahan otp lalu mengunci sesi', function () {
     $nasabah = passwordResetNasabah();
 
-    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001'));
+    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload());
 
     foreach ([1, 2] as $percobaan) {
         $this->postJson(route('password.validasi-otp'), [
-            'nis' => $nasabah->nis,
+            'email' => $nasabah->user->email,
             'code' => '000001',
         ])->assertStatus(422)
             ->assertJsonPath('message', 'Kode OTP salah. Sisa percobaan: '.(3 - $percobaan).'.');
     }
 
     $this->postJson(route('password.validasi-otp'), [
-        'nis' => $nasabah->nis,
+        'email' => $nasabah->user->email,
         'code' => '000001',
     ])->assertStatus(423);
 
@@ -138,13 +135,13 @@ it('menghitung tiga kali kesalahan otp lalu mengunci sesi', function () {
     $this->assertNotNull($record->locked_until);
 
     $this->postJson(route('password.validasi-otp'), [
-        'nis' => $nasabah->nis,
+        'email' => $nasabah->user->email,
         'code' => '000001',
     ])->assertStatus(423);
 });
 
 it('mengarahkan ke halaman buat password baru setelah otp terverifikasi', function () {
-    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001'));
+    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload());
 
     $code = null;
     Mail::assertSent(OtpMail::class, function (OtpMail $mail) use (&$code) {
@@ -154,7 +151,7 @@ it('mengarahkan ke halaman buat password baru setelah otp terverifikasi', functi
     });
 
     $this->postJson(route('password.validasi-otp'), [
-        'nis' => '20241001',
+        'email' => passwordResetNasabah()->user->email,
         'code' => $code,
     ])->assertOk();
 
@@ -170,7 +167,7 @@ it('menolak akses halaman buat password tanpa sesi valid', function () {
 });
 
 it('menyimpan password baru dan menghapus sesi reset', function () {
-    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001'));
+    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload());
 
     $code = null;
     Mail::assertSent(OtpMail::class, function (OtpMail $mail) use (&$code) {
@@ -180,7 +177,7 @@ it('menyimpan password baru dan menghapus sesi reset', function () {
     });
 
     $this->postJson(route('password.validasi-otp'), [
-        'nis' => '20241001',
+        'email' => passwordResetNasabah()->user->email,
         'code' => $code,
     ])->assertOk();
 
@@ -203,7 +200,7 @@ it('menolak simpan password tanpa sesi valid', function () {
 });
 
 it('memvalidasi input otp, password wajib konfirmasi cocok', function () {
-    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload('20241001'));
+    $this->postJson(route('password.kirim-otp'), passwordResetRequestPayload());
 
     $code = null;
     Mail::assertSent(OtpMail::class, function (OtpMail $mail) use (&$code) {
@@ -213,7 +210,7 @@ it('memvalidasi input otp, password wajib konfirmasi cocok', function () {
     });
 
     $this->postJson(route('password.validasi-otp'), [
-        'nis' => '20241001',
+        'email' => passwordResetNasabah()->user->email,
         'code' => $code,
     ])->assertOk();
 

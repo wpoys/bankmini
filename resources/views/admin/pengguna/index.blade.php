@@ -76,6 +76,9 @@
                             <th>Nama</th>
                             @if ($filter !== 'nasabah')
                                 <th>Username / NIS</th>
+                                @if ($filter !== 'all')
+                                    <th>Email</th>
+                                @endif
                             @endif
                             @if ($filter === 'nasabah' || $filter === 'all')
                                 <th>Kelas</th>
@@ -125,6 +128,9 @@
 
                                 @if ($filter !== 'nasabah')
                                     <td class="small"><code>{{ $p->username ?: $p->nis }}</code></td>
+                                    @if ($filter !== 'all')
+                                        <td class="small">{{ $p->email ?: '—' }}</td>
+                                    @endif
                                 @endif
 
                                 @if ($filter === 'nasabah' || $filter === 'all')

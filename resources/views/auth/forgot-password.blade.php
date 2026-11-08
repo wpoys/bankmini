@@ -18,29 +18,11 @@
                     @csrf
                     <div id="identitasFields">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">NIS</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
-                                <input type="text" class="form-control" name="nis"
-                                       placeholder="Masukkan NIS" autofocus>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small">No Rekening</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fa-solid fa-wallet"></i></span>
-                                <input type="text" class="form-control" name="no_rekening"
-                                       placeholder="Masukkan nomor rekening">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
                             <label class="form-label fw-semibold small" for="resetEmail">Email</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                                 <input type="email" class="form-control" name="email" id="resetEmail"
-                                       placeholder="email@contoh.com" autocomplete="email">
+                                       placeholder="email@contoh.com" autocomplete="email" autofocus required>
                             </div>
                         </div>
 
@@ -49,7 +31,7 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-solid fa-shield-halved"></i></span>
                                 <input type="password" class="form-control" name="pin_keamanan"
-                                       placeholder="Masukkan PIN keamanan">
+                                       placeholder="Masukkan PIN keamanan" required>
                             </div>
                         </div>
                     </div>
@@ -113,7 +95,7 @@
 
             const state = {
                 step: 'identitas',
-                nis: '',
+                email: '',
                 timer: null,
             };
 
@@ -226,13 +208,9 @@
                 clearAlert();
 
                 if (state.step === 'identitas') {
-                    const nis = form.querySelector('input[name="nis"]').value.trim();
-                    const noRekening = form.querySelector('input[name="no_rekening"]').value.trim();
                     const email = emailInput.value.trim();
                     const pin = form.querySelector('input[name="pin_keamanan"]').value;
 
-                    if (!nis) { showAlert('danger', 'NIS wajib diisi.'); return; }
-                    if (!noRekening) { showAlert('danger', 'No Rekening wajib diisi.'); return; }
                     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
                         e.preventDefault();
                         showAlert('danger', invalidEmailMessage);
@@ -245,8 +223,6 @@
 
                     try {
                         const { ok, data } = await postJson('{{ route('password.kirim-otp') }}', {
-                            nis,
-                            no_rekening: noRekening,
                             email,
                             pin_keamanan: pin,
                         });
@@ -256,7 +232,7 @@
                             return;
                         }
 
-                        state.nis = nis;
+                        state.email = email;
                         showAlert('success', data.message);
                         document.getElementById('infoEmailAddr').textContent = data.email;
 
@@ -281,7 +257,7 @@
 
                     try {
                         const { ok, status, data } = await postJson('{{ route('password.validasi-otp') }}', {
-                            nis: state.nis,
+                            email: state.email,
                             code,
                         });
 

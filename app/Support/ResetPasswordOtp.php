@@ -23,10 +23,33 @@ class ResetPasswordOtp
 
     public const TOKEN_TTL_MINUTES = 10;
 
-    /**
-     * Cocokkan identitas nasabah (NIS + No Rekening + PIN Keamanan) dan
-     * pastikan akunnya punya email terdaftar.
-     */
+    public function verifikasiEmailDanPin(string $email, string $pin): Nasabah
+    {
+        $nasabah = Nasabah::with('user')
+            ->whereHas('user', fn ($query) => $query->whereRaw('LOWER(email) = ?', [mb_strtolower($email)]))
+            ->first();
+
+        if (! $nasabah) {
+            throw new ResetPasswordOtpException(
+                'Akun dengan email tersebut tidak ditemukan.',
+                'email',
+                422,
+                'Akun dengan email tersebut tidak ditemukan.',
+            );
+        }
+
+        if (! $nasabah->pin_keamanan || ! Hash::check($pin, $nasabah->pin_keamanan)) {
+            throw new ResetPasswordOtpException(
+                'PIN Keamanan salah.',
+                'pin_keamanan',
+                422,
+                'PIN Keamanan tidak sesuai.',
+            );
+        }
+
+        return $nasabah;
+    }
+
     public function verifikasiIdentitas(string $nis, string $noRekening, string $pin, ?string $email = null): Nasabah
     {
         $nasabah = Nasabah::with('user')
