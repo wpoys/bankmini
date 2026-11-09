@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\DetailLaporan;
 use App\Models\Konfigurasi;
 use App\Models\LaporanHarian;
+use App\Models\MutasiBrankas;
 use App\Models\RekonsiliasiKas;
 use App\Models\Transaksi;
 use App\Models\User;
@@ -104,8 +105,8 @@ class LaporanController extends Controller
             ? (int) $request->input('kas_dipindahkan')
             : null;
 
-        if ($kasDipindahkan !== null && $kasDipindahkan > $saldoAkhirSistem) {
-            return back()->withInput()->with('error', 'Jumlah kas yang dipindahkan ke brankas tidak boleh melebihi saldo akhir kas (Rp '.number_format($saldoAkhirSistem, 0, ',', '.').').');
+        if ($kasDipindahkan !== null && $kasDipindahkan > $totalFisik) {
+            return back()->withInput()->with('error', 'Jumlah kas yang dipindahkan ke brankas tidak boleh melebihi saldo fisik kas (Rp '.number_format($totalFisik, 0, ',', '.').').');
         }
 
         try {
@@ -200,7 +201,7 @@ class LaporanController extends Controller
         $pdf = Pdf::loadView('teller.laporan.pdf.harian', compact('laporan'));
         $pdf->setPaper('a4', 'portrait');
 
-        return $pdf->download('laporan-harian-teller-' . $laporan->tanggal->format('Y-m-d') . '.pdf');
+        return $pdf->download('laporan-harian-teller-'.$laporan->tanggal->format('Y-m-d').'.pdf');
     }
 
     public function submit(LaporanHarian $laporan): RedirectResponse
@@ -278,14 +279,21 @@ class LaporanController extends Controller
 
     protected function hitungSaldoAwalKas(): int
     {
+        $kasDiambilDariBrankas = (int) MutasiBrankas::where('user_id', Auth::id())
+            ->where('jenis', 'kas_awal_teller')
+            ->whereDate('created_at', today())
+            ->sum(DB::raw('ABS(nominal)'));
+
         $laporanKemarin = LaporanHarian::where('teller_id', Auth::id())
-            ->whereDate('tanggal', today()->subDay())
+            ->whereDate('tanggal', '<', today())
+            ->where('status', 'disetujui')
+            ->latest('tanggal')
             ->first();
 
-        if ($laporanKemarin) {
-            return (int) $laporanKemarin->saldo_akhir_sistem;
-        }
+        $saldoKasKemarin = $laporanKemarin
+            ? max(0, (int) $laporanKemarin->saldo_akhir_sistem - (int) $laporanKemarin->kas_dipindahkan)
+            : 0;
 
-        return 0;
+        return $saldoKasKemarin + $kasDiambilDariBrankas;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Nasabah;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,6 +46,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'username' => ['required', 'string', 'unique:users,username'],
+            'email' => ['required', 'email', 'max:191', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
             'nama_petugas' => ['required', 'string', 'max:255'],
             'role' => $this->roleRules(),
@@ -53,6 +55,7 @@ class UserController extends Controller
 
         User::create([
             'username' => $validated['username'],
+            'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'nama_petugas' => $validated['nama_petugas'],
             'role' => $validated['role'],
@@ -65,15 +68,43 @@ class UserController extends Controller
             ->with('success', 'User berhasil ditambahkan.');
     }
 
-    public function edit(User $user): View
+    public function edit(Request $request, User $user): View
     {
-        return view('admin.users.edit', compact('user'));
+        $returnUrl = $this->penggunaReturnUrl($request);
+
+        return view('admin.users.edit', compact('user', 'returnUrl'));
+    }
+
+    protected function penggunaReturnUrl(Request $request): ?string
+    {
+        if (! $request->boolean('return_to_pengguna')) {
+            return null;
+        }
+
+        $filter = $request->get('filter', 'all');
+        if (! in_array($filter, ['all', 'admin', 'supervisor', 'teller', 'nasabah'], true)) {
+            $filter = 'all';
+        }
+
+        $kelas = $request->get('kelas', '');
+        if (! in_array($kelas, Nasabah::KELAS, true)) {
+            $kelas = '';
+        }
+
+        return route('admin.pengguna.index', array_filter([
+            'filter' => $filter,
+            'kelas' => $kelas,
+            'search' => $request->string('search')->limit(100)->toString(),
+            'page' => max(1, (int) $request->get('page', 1)),
+            'per_page' => in_array((int) $request->get('per_page'), [15, 30, 50], true) ? (int) $request->get('per_page') : 15,
+        ], fn ($value) => $value !== ''));
     }
 
     public function update(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validate([
             'username' => ['required', 'string', Rule::unique('users', 'username')->ignore($user->id)],
+            'email' => ['required', 'email', 'max:191', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
             'nama_petugas' => ['required', 'string', 'max:255'],
             'role' => $this->roleRules(),
@@ -82,6 +113,7 @@ class UserController extends Controller
 
         $user->fill([
             'username' => $validated['username'],
+            'email' => $validated['email'],
             'nama_petugas' => $validated['nama_petugas'],
             'role' => $validated['role'],
             'status' => $validated['status'],
@@ -95,7 +127,7 @@ class UserController extends Controller
 
         ActivityLog::catat(auth()->id(), 'ubah_user', "User {$user->username} diperbarui.");
 
-        return redirect()->route('admin.users.index')
+        return redirect($this->penggunaReturnUrl($request) ?? route('admin.users.index'))
             ->with('success', 'User berhasil diperbarui.');
     }
 

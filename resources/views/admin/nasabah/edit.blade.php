@@ -12,7 +12,7 @@
                 <div class="page-header-sub">{{ $nasabah->nama_siswa }}</div>
             </div>
             <div class="header-actions">
-                <a href="{{ route('admin.nasabah.index') }}" class="quick-action">
+                <a href="{{ $returnUrl ?? route('admin.nasabah.index') }}" class="quick-action">
                     <i class="fa-solid fa-arrow-left"></i><span>Kembali</span>
                 </a>
             </div>
@@ -25,6 +25,12 @@
                         <form method="POST" action="{{ route('admin.nasabah.update', $nasabah->id) }}">
                             @csrf
                             @method('PUT')
+                            @if ($returnUrl)
+                                <input type="hidden" name="return_to_pengguna" value="1">
+                                @foreach (request()->only(['filter', 'kelas', 'search', 'page', 'per_page']) as $key => $value)
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endforeach
+                            @endif
 
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Nama Lengkap</label>
@@ -87,7 +93,7 @@
 
                             <div class="d-flex gap-2">
                                 <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i>Perbarui</button>
-                                <a href="{{ route('admin.nasabah.index') }}" class="btn btn-outline-secondary">Batal</a>
+                                <a href="{{ $returnUrl ?? route('admin.nasabah.index') }}" class="btn btn-outline-secondary">Batal</a>
                             </div>
                         </form>
                     </div>

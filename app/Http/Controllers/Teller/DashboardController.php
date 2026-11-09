@@ -5,18 +5,24 @@ namespace App\Http\Controllers\Teller;
 use App\Http\Controllers\Controller;
 use App\Models\JadwalPetugas;
 use App\Models\LaporanHarian;
-use App\Models\Nasabah;
+use App\Models\MutasiBrankas;
 use App\Models\Transaksi;
+use App\Support\BrankasService;
 use App\Support\QrisNasabah;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
+        $saldoBrankas = BrankasService::saldo();
         $totalSetoranHariIni = (int) Transaksi::whereDate('tanggal', today())
             ->where('id_user', Auth::id())
             ->where('status', Transaksi::STATUS_APPROVED)
@@ -38,9 +44,14 @@ class DashboardController extends Controller
             ->whereDate('tanggal', today())
             ->first();
 
+        $kasAwalHariIni = (int) MutasiBrankas::where('user_id', Auth::id())
+            ->where('jenis', 'kas_awal_teller')
+            ->whereDate('created_at', today())
+            ->sum(DB::raw('ABS(nominal)'));
+
         $saldoKas = $laporanHariIni
             ? $laporanHariIni->saldo_akhir_sistem
-            : $totalSetoranHariIni - $totalPenarikanHariIni;
+            : $kasAwalHariIni + $totalSetoranHariIni - $totalPenarikanHariIni;
 
         $transaksiTerbaru = Transaksi::with(['nasabah', 'user'])
             ->where('id_user', Auth::id())
@@ -90,7 +101,24 @@ class DashboardController extends Controller
             'grafikJam',
             'laporanHariIni',
             'jadwalHariIni',
+            'saldoBrankas',
         ));
+    }
+
+    public function ambilKas(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'jumlah' => ['required', 'integer', 'min:1', 'max:999999999999'],
+            'password' => ['required', 'string'],
+        ]);
+
+        if (! Hash::check($validated['password'], $request->user()->password)) {
+            throw ValidationException::withMessages(['password' => 'Password teller tidak sesuai.']);
+        }
+
+        BrankasService::ambilKas((int) $validated['jumlah'], (int) $request->user()->id);
+
+        return redirect()->route('teller.dashboard')->with('success', 'Kas berhasil diambil dari brankas dan langsung ditambahkan ke kas awal teller.');
     }
 
     public function cariNasabah(Request $request): JsonResponse

@@ -7,13 +7,16 @@ use App\Models\JadwalPetugas;
 use App\Models\LaporanHarian;
 use App\Models\Nasabah;
 use App\Models\PermintaanResetPin;
-use App\Models\Transaksi;use App\Models\User;
+use App\Models\Transaksi;
+use App\Models\User;
+use App\Support\BrankasService;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
+        $saldoBrankas = BrankasService::saldo();
         $totalNasabah = Nasabah::count();
         $totalUser = User::count();
         $transaksiHariIni = Transaksi::whereDate('tanggal', today())
@@ -46,6 +49,7 @@ class DashboardController extends Controller
             'userTerbaru',
             'grafikTransaksi',
             'jadwalPetugasHariIni',
+            'saldoBrankas',
         ));
     }
 

@@ -7,8 +7,8 @@
 @section('content')
     <div class="page-animate admin-dashboard">
 
-        <div class="row g-3 mb-3 admin-dashboard-stats">
-            <div class="col-6 col-xl-3">
+        <div class="admin-dashboard-stats">
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Total Nasabah</span>
@@ -18,7 +18,7 @@
                     <div class="stat-hint">Seluruh rekening aktif</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Total User</span>
@@ -28,7 +28,7 @@
                     <div class="stat-hint">Pengguna sistem</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Transaksi Hari Ini</span>
@@ -38,7 +38,22 @@
                     <div class="stat-hint">Seluruh loket</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-3">
+            <div>
+                <div class="stat-card h-100">
+                    <div class="stat-top">
+                        <span class="stat-label">Saldo Brankas</span>
+                        <span class="stat-icon bg-info-subtle text-info"><i class="fa-solid fa-vault"></i></span>
+                    </div>
+                    <div class="stat-value">Rp {{ number_format($saldoBrankas, 0, ',', '.') }}</div>
+                    <form method="POST" action="{{ route('admin.brankas.update') }}" class="mt-2 d-flex gap-2">
+                        @csrf
+                        @method('PUT')
+                        <input type="number" name="saldo" class="form-control form-control-sm" min="0" value="{{ $saldoBrankas }}" aria-label="Saldo brankas baru" required>
+                        <button class="btn btn-sm btn-outline-primary text-nowrap">Atur Saldo</button>
+                    </form>
+                </div>
+            </div>
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Laporan Pending</span>

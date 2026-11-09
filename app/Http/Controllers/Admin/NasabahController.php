@@ -58,9 +58,36 @@ class NasabahController extends Controller
         }
     }
 
-    public function edit(Nasabah $nasabah): View
+    public function edit(Request $request, Nasabah $nasabah): View
     {
-        return view('admin.nasabah.edit', compact('nasabah'));
+        $returnUrl = $this->penggunaReturnUrl($request);
+
+        return view('admin.nasabah.edit', compact('nasabah', 'returnUrl'));
+    }
+
+    protected function penggunaReturnUrl(Request $request): ?string
+    {
+        if (! $request->boolean('return_to_pengguna')) {
+            return null;
+        }
+
+        $filter = $request->get('filter', 'nasabah');
+        if (! in_array($filter, ['all', 'admin', 'supervisor', 'teller', 'nasabah'], true)) {
+            $filter = 'nasabah';
+        }
+
+        $kelas = $request->get('kelas', '');
+        if (! in_array($kelas, Nasabah::KELAS, true)) {
+            $kelas = '';
+        }
+
+        return route('admin.pengguna.index', array_filter([
+            'filter' => $filter,
+            'kelas' => $kelas,
+            'search' => $request->string('search')->limit(100)->toString(),
+            'page' => max(1, (int) $request->get('page', 1)),
+            'per_page' => in_array((int) $request->get('per_page'), [15, 30, 50], true) ? (int) $request->get('per_page') : 15,
+        ], fn ($value) => $value !== ''));
     }
 
     public function update(Request $request, Nasabah $nasabah): RedirectResponse
@@ -70,7 +97,7 @@ class NasabahController extends Controller
         try {
             PendaftaranNasabah::perbarui($nasabah, auth()->id(), $validated);
 
-            return redirect()->route('admin.nasabah.index')
+            return redirect($this->penggunaReturnUrl($request) ?? route('admin.nasabah.index'))
                 ->with('success', 'Nasabah berhasil diperbarui.');
         } catch (\Throwable $e) {
             return back()->withInput()
@@ -92,22 +119,24 @@ class NasabahController extends Controller
                 $transaksiIds = $nasabah->transaksi()->pluck('id');
 
                 if ($transaksiIds->isNotEmpty()) {
-                    DB::table('koreksi_transaksi')->whereIn('transaksi_id', $transaksiIds)->delete();
-                    DB::table('jurnal_akuntansi')->whereIn('id_transaksi', $transaksiIds)->delete();
-                    DB::table('detail_laporan')->whereIn('transaksi_id', $transaksiIds)->delete();
-                    DB::table('transaksi')->whereIn('id', $transaksiIds)->delete();
+                    DB::table('koreksi_transaksi')->whereIn('transaksi_id', $transaksiIds)->update(['id_nasabah' => null]);
+                    DB::table('transaksi')->whereIn('id', $transaksiIds)->update(['id_nasabah' => null]);
+                }
+                if ($akun) {
+                    DB::table('transaksi')->where('id_user', $akun->id)->update(['id_user' => null]);
+                    DB::table('koreksi_transaksi')->where('id_user', $akun->id)->update(['id_user' => null]);
+                    DB::table('koreksi_transaksi')->where('id_nasabah', $nasabah->id)->update(['id_nasabah' => null]);
                 }
 
                 DB::table('permintaan_reset_pin')->where('id_nasabah', $nasabah->id)->delete();
-
+                DB::table('koreksi_transaksi')->where('id_nasabah', $nasabah->id)->update(['id_nasabah' => null, 'id_user' => null]);
                 $nasabah->delete();
                 $akun?->delete();
             });
 
-            ActivityLog::catat(auth()->id(), 'hapus_nasabah', "Nasabah {$nama} dihapus permanen beserta akun user dan seluruh data terkait.");
+            ActivityLog::catat(auth()->id(), 'hapus_nasabah', "Nasabah {$nama} dihapus permanen; riwayat transaksi dipertahankan.");
 
-            return redirect()->route('admin.nasabah.index')
-                ->with('success', "Nasabah {$nama}, akun user, saldo, dan seluruh data terkait berhasil dihapus permanen.");
+            return back()->with('success', "Nasabah {$nama} dan akunnya berhasil dihapus. Riwayat transaksi tetap dipertahankan.");
         } catch (\Throwable $e) {
             return back()->with('error', 'Gagal menghapus nasabah permanen: '.$e->getMessage());
         }

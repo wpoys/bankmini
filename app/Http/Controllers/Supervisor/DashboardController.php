@@ -8,12 +8,14 @@ use App\Models\LaporanHarian;
 use App\Models\Nasabah;
 use App\Models\PermintaanResetPin;
 use App\Models\Transaksi;
+use App\Support\BrankasService;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
+        $saldoBrankas = BrankasService::saldo();
         $laporanPending = LaporanHarian::where('status', 'menunggu_approval')->count();
         $laporanDisetujui = LaporanHarian::where('status', 'disetujui')->count();
         $laporanDitolak = LaporanHarian::where('status', 'ditolak')->count();
@@ -68,6 +70,7 @@ class DashboardController extends Controller
             'daftarPermintaanPin',
             'daftarMenunggu',
             'grafik',
+            'saldoBrankas',
         ));
     }
 }

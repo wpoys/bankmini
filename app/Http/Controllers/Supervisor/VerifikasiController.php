@@ -10,6 +10,7 @@ use App\Models\LaporanHarian;
 use App\Models\PermintaanResetPin;
 use App\Models\Transaksi;
 use App\Models\UserNotification;
+use App\Support\BrankasService;
 use App\Support\KodeAkun;
 use App\Support\VerifikasiHarianService;
 use Illuminate\Http\RedirectResponse;
@@ -187,6 +188,7 @@ class VerifikasiController extends Controller
             ]);
 
             if ($jumlahBrankas > 0) {
+                BrankasService::setorDariLaporan($jumlahBrankas, (int) $laporan->teller_id, (int) $laporan->id);
                 $laporan->update([
                     'kas_dipindahkan' => $jumlahBrankas,
                     'kas_dipindahkan_oleh' => auth()->id(),

@@ -10,13 +10,14 @@
 
 @section('content')
     <div class="page-animate teller-dashboard-page">
-        <div class="row g-2 teller-dashboard-stats">
-            <div class="col-6 col-xl-2"><div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Setoran</span><span class="stat-icon bg-success-subtle text-success"><i class="fa-solid fa-arrow-down"></i></span></div><div class="stat-value">Rp {{ number_format($totalSetoranHariIni, 0, ',', '.') }}</div><div class="stat-hint">Hari ini</div></div></div>
-            <div class="col-6 col-xl-2"><div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Penarikan</span><span class="stat-icon bg-danger-subtle text-danger"><i class="fa-solid fa-arrow-up"></i></span></div><div class="stat-value">Rp {{ number_format($totalPenarikanHariIni, 0, ',', '.') }}</div><div class="stat-hint">Hari ini</div></div></div>
-            <div class="col-6 col-xl-2"><div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Total Transaksi</span><span class="stat-icon bg-primary-subtle text-primary"><i class="fa-solid fa-receipt"></i></span></div><div class="stat-value">{{ number_format($jumlahTransaksi, 0, ',', '.') }}</div><div class="stat-hint">Sepanjang hari</div></div></div>
-            <div class="col-6 col-xl-2"><div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Saldo Fisik Kas</span><span class="stat-icon bg-warning-subtle text-warning"><i class="fa-solid fa-vault"></i></span></div><div class="stat-value">Rp {{ number_format($saldoKas, 0, ',', '.') }}</div><div class="stat-hint">Hari ini</div></div></div>
-            <div class="col-6 col-xl-2"><div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Pending</span><span class="stat-icon bg-warning-subtle text-warning"><i class="fa-solid fa-hourglass-half"></i></span></div><div class="stat-value">{{ number_format($transaksiPending, 0, ',', '.') }}</div><div class="stat-hint">Menunggu approval</div></div></div>
-            <div class="col-6 col-xl-2"><div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Selisih Kas</span><span class="stat-icon bg-info-subtle text-info"><i class="fa-solid fa-scale-balanced"></i></span></div><div class="stat-value {{ $selisihKas === 0 ? 'text-success' : 'text-danger' }}">Rp {{ number_format($selisihKas, 0, ',', '.') }}</div><div class="stat-hint">Sistem vs fisik</div></div></div>
+        <div class="teller-dashboard-stats">
+            <div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Setoran</span><span class="stat-icon bg-success-subtle text-success"><i class="fa-solid fa-arrow-down"></i></span></div><div class="stat-value">Rp {{ number_format($totalSetoranHariIni, 0, ',', '.') }}</div><div class="stat-hint">Hari ini</div></div>
+            <div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Penarikan</span><span class="stat-icon bg-danger-subtle text-danger"><i class="fa-solid fa-arrow-up"></i></span></div><div class="stat-value">Rp {{ number_format($totalPenarikanHariIni, 0, ',', '.') }}</div><div class="stat-hint">Hari ini</div></div>
+            <div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Total Transaksi</span><span class="stat-icon bg-primary-subtle text-primary"><i class="fa-solid fa-receipt"></i></span></div><div class="stat-value">{{ number_format($jumlahTransaksi, 0, ',', '.') }}</div><div class="stat-hint">Sepanjang hari</div></div>
+            <div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Saldo Fisik Kas</span><span class="stat-icon bg-warning-subtle text-warning"><i class="fa-solid fa-vault"></i></span></div><div class="stat-value">Rp {{ number_format($saldoKas, 0, ',', '.') }}</div><div class="stat-hint">Hari ini</div></div>
+            <div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Saldo Brankas</span><span class="stat-icon bg-info-subtle text-info"><i class="fa-solid fa-building-columns"></i></span></div><div class="stat-value">Rp {{ number_format($saldoBrankas, 0, ',', '.') }}</div><div class="stat-hint"><button type="button" class="btn btn-sm btn-outline-primary mt-1" data-bs-toggle="modal" data-bs-target="#modalAmbilKas">Ambil Kas Awal</button></div></div>
+            <div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Pending</span><span class="stat-icon bg-warning-subtle text-warning"><i class="fa-solid fa-hourglass-half"></i></span></div><div class="stat-value">{{ number_format($transaksiPending, 0, ',', '.') }}</div><div class="stat-hint">Menunggu approval</div></div>
+            <div class="stat-card teller-stat-card"><div class="stat-top"><span class="stat-label">Selisih Kas</span><span class="stat-icon bg-info-subtle text-info"><i class="fa-solid fa-scale-balanced"></i></span></div><div class="stat-value {{ $selisihKas === 0 ? 'text-success' : 'text-danger' }}">Rp {{ number_format($selisihKas, 0, ',', '.') }}</div><div class="stat-hint">Sistem vs fisik</div></div>
         </div>
 
         <div class="row g-2 teller-dashboard-main-row">
@@ -138,6 +139,37 @@
             <div class="modal-body text-center"><p class="small text-muted">Arahkan QR rekening nasabah ke kamera.</p><div id="readerNasabahDashboard" class="mx-auto rounded border bg-light"></div><div id="statusScanNasabahDashboard" class="small text-muted mt-3" aria-live="polite"></div></div>
             <div class="modal-footer"><button type="button" class="btn btn-outline-primary btn-sm d-none" id="btnUlangScanNasabahDashboard">Scan Ulang</button><button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Tutup</button></div>
         </div></div>
+    </div>
+
+    <div class="modal fade" id="modalAmbilKas" tabindex="-1" aria-labelledby="modalAmbilKasLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAmbilKasLabel">Ambil Kas Awal dari Brankas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form method="POST" action="{{ route('teller.brankas.ambil') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah kas awal</label>
+                            <input type="number" name="jumlah" class="form-control" min="1" max="999999999999" value="{{ old('jumlah') }}" required>
+                            @error('jumlah')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password teller</label>
+                            <input type="password" name="password" class="form-control" required autocomplete="current-password">
+                            @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="small text-muted">Saldo brankas tersedia: Rp {{ number_format($saldoBrankas, 0, ',', '.') }}. Kas langsung ditambahkan ke saldo awal kas teller hari ini.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-primary">Konfirmasi Ambil Kas</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -296,5 +328,11 @@
                 if (!activeFormUrl) event.preventDefault();
             });
         })();
+
+        @if ($errors->has('jumlah') || $errors->has('password'))
+            document.addEventListener('DOMContentLoaded', () => {
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAmbilKas')).show();
+            });
+        @endif
     </script>
 @endpush

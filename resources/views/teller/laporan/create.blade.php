@@ -111,7 +111,7 @@
                         </div>
                         <div class="panel-body p-2">
                             <div class="laporan-summary-grid">
-                                <div class="laporan-summary-card system"><span>Saldo Awal Kas</span><strong>Rp {{ number_format($saldoAwalKas, 0, ',', '.') }}</strong><small>Dari saldo hari sebelumnya</small></div>
+                                <div class="laporan-summary-card system"><span>Saldo Awal Kas</span><strong>Rp {{ number_format($saldoAwalKas, 0, ',', '.') }}</strong><small>Total kas awal diambil dari brankas hari ini</small></div>
                                 <div class="laporan-summary-card deposit"><span>Total Setoran</span><strong>+Rp {{ number_format($totalSetoran, 0, ',', '.') }}</strong><small>Setoran hari ini</small></div>
                                 <div class="laporan-summary-card withdrawal"><span>Total Penarikan</span><strong>-Rp {{ number_format($totalPenarikan, 0, ',', '.') }}</strong><small>Penarikan hari ini</small></div>
                                 <div class="laporan-summary-card ending"><span>Saldo Akhir Sistem</span><strong>Rp {{ number_format($saldoAkhirSistem, 0, ',', '.') }}</strong><small>Saldo akhir menurut sistem</small></div>

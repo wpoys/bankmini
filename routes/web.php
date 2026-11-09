@@ -4,6 +4,7 @@ use App\Http\Controllers\Accounting\JurnalController as AccountingJurnalControll
 use App\Http\Controllers\Accounting\LaporanController as AccountingLaporanController;
 use App\Http\Controllers\Accounting\VerifikasiKoreksiController as AccountingVerifikasiKoreksiController;
 use App\Http\Controllers\Admin\BackupController as AdminBackupController;
+use App\Http\Controllers\Admin\BrankasController as AdminBrankasController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\KonfigurasiController as AdminKonfigurasiController;
 use App\Http\Controllers\Admin\NasabahController as AdminNasabahController;
@@ -59,6 +60,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
 
     Route::prefix('admin')->middleware('role:admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::put('brankas/saldo-awal', [AdminBrankasController::class, 'update'])->name('brankas.update');
 
         Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('users/create', [AdminUserController::class, 'create'])->name('users.create');
@@ -110,6 +112,7 @@ Route::middleware(['auth', 'check.active'])->group(function () {
 
     Route::prefix('teller')->middleware('role:teller')->name('teller.')->group(function () {
         Route::get('/dashboard', [TellerDashboardController::class, 'index'])->name('dashboard');
+        Route::post('brankas/ambil', [TellerDashboardController::class, 'ambilKas'])->name('brankas.ambil');
         Route::post('dashboard/cari-nasabah', [TellerDashboardController::class, 'cariNasabah'])->name('dashboard.cari-nasabah');
 
         Route::get('transaksi', [TellerTransaksiController::class, 'index'])->name('transaksi.index');
@@ -201,4 +204,8 @@ Route::middleware(['auth', 'check.active'])->group(function () {
 
 Route::prefix('admin')->middleware(['auth', 'check.active', 'role:admin'])->name('admin.')->group(function () {
     Route::get('pengguna', [AdminPenggunaController::class, 'index'])->name('pengguna.index');
+    Route::post('pengguna/arsip-terpilih', [AdminPenggunaController::class, 'arsipTerpilih'])->name('pengguna.arsip-terpilih');
+    Route::post('pengguna/pulihkan-terpilih', [AdminPenggunaController::class, 'pulihkanTerpilih'])->name('pengguna.pulihkan-terpilih');
+    Route::post('pengguna/hapus-terpilih', [AdminPenggunaController::class, 'hapusTerpilih'])->name('pengguna.hapus-terpilih');
+    Route::post('pengguna/ekspor/{format}', [AdminPenggunaController::class, 'ekspor'])->name('pengguna.ekspor');
 });

@@ -18,8 +18,15 @@
             </div>
         </div>
 
-        <div class="row g-3 mb-3 justify-content-center">
-            <div class="col-6 col-xl-2">
+        <div class="supervisor-dashboard-stats">
+            <div>
+                <div class="stat-card h-100">
+                    <div class="stat-top"><span class="stat-label">Saldo Brankas</span><span class="stat-icon bg-info-subtle text-info"><i class="fa-solid fa-vault"></i></span></div>
+                    <div class="stat-value">Rp {{ number_format($saldoBrankas, 0, ',', '.') }}</div>
+                    <div class="stat-hint">Saldo bersama terkini</div>
+                </div>
+            </div>
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Menunggu Verifikasi</span>
@@ -30,7 +37,7 @@
                     <div class="stat-hint">Perlu ditindaklanjuti</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-2">
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Koreksi Transaksi</span>
@@ -40,7 +47,7 @@
                     <div class="stat-hint">Menunggu persetujuan</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-2">
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Disetujui</span>
@@ -51,7 +58,7 @@
                     <div class="stat-hint">Laporan disetujui · total</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-2">
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Ditolak</span>
@@ -61,7 +68,7 @@
                     <div class="stat-hint">Laporan ditolak · total</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-2">
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Pengajuan PIN</span>
@@ -71,7 +78,7 @@
                     <div class="stat-hint">Menunggu persetujuan</div>
                 </div>
             </div>
-            <div class="col-6 col-xl-2">
+            <div>
                 <div class="stat-card h-100">
                     <div class="stat-top">
                         <span class="stat-label">Nasabah Aktif</span>

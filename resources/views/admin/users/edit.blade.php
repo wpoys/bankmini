@@ -12,7 +12,7 @@
                 <div class="page-header-sub">{{ $user->nama_petugas }}</div>
             </div>
             <div class="header-actions">
-                <a href="{{ route('admin.users.index') }}" class="quick-action">
+                <a href="{{ $returnUrl ?? route('admin.users.index') }}" class="quick-action">
                     <i class="fa-solid fa-arrow-left"></i><span>Kembali</span>
                 </a>
             </div>
@@ -25,11 +25,23 @@
                         <form method="POST" action="{{ route('admin.users.update', $user->id) }}">
                             @csrf
                             @method('PUT')
+                            @if ($returnUrl)
+                                <input type="hidden" name="return_to_pengguna" value="1">
+                                @foreach (request()->only(['filter', 'kelas', 'search', 'page', 'per_page']) as $key => $value)
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endforeach
+                            @endif
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Nama Petugas</label>
                                 <input type="text" name="nama_petugas" value="{{ old('nama_petugas', $user->nama_petugas) }}"
                                        class="form-control @error('nama_petugas') is-invalid @enderror">
                                 @error('nama_petugas')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" value="{{ old('email', $user->email) }}"
+                                       class="form-control @error('email') is-invalid @enderror" required>
+                                @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -66,7 +78,7 @@
                             </div>
                             <div class="d-flex gap-2">
                                 <button class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i>Perbarui</button>
-                                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">Batal</a>
+                                <a href="{{ $returnUrl ?? route('admin.users.index') }}" class="btn btn-outline-secondary">Batal</a>
                             </div>
                         </form>
                     </div>
